@@ -1,0 +1,859 @@
+{
+  "persona_id": "finance_server",
+  "display_name": "Finance Production Server",
+  "threat_trigger_level": "critical",
+  "schema_version": 1,
+  "system": {
+    "hostname": "fin-db-prod-01",
+    "os": "Ubuntu 20.04.6 LTS",
+    "kernel": "5.4.0-150-generic",
+    "arch": "x86_64",
+    "uptime_seconds": 7724240,
+    "boot_time": "2026-01-17T03:22:40Z",
+    "timezone": "UTC",
+    "locale": "en_US.UTF-8"
+  },
+  "network": {
+    "interfaces": [
+      {
+        "name": "eth0",
+        "ip": "10.20.4.11",
+        "mac": "0a:1f:2b:3c:4d:5e",
+        "netmask": "255.255.255.0",
+        "broadcast": "10.20.4.255",
+        "state": "UP",
+        "rx_bytes": 8441220988,
+        "tx_bytes": 4912773445
+      },
+      {
+        "name": "lo",
+        "ip": "127.0.0.1",
+        "mac": "00:00:00:00:00:00",
+        "netmask": "255.0.0.0",
+        "broadcast": null,
+        "state": "UP",
+        "rx_bytes": 2184441,
+        "tx_bytes": 2184441
+      }
+    ],
+    "open_ports": [
+      22,
+      5432,
+      8443
+    ],
+    "active_connections": [
+      {
+        "proto": "tcp",
+        "local_addr": "0.0.0.0:22",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 912,
+        "program": "sshd"
+      },
+      {
+        "proto": "tcp6",
+        "local_addr": ":::22",
+        "foreign_addr": ":::*",
+        "state": "LISTEN",
+        "pid": 912,
+        "program": "sshd"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "10.20.4.11:5432",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 1844,
+        "program": "postgres"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "127.0.0.1:5432",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 1844,
+        "program": "postgres"
+      },
+      {
+        "proto": "tcp6",
+        "local_addr": ":::8443",
+        "foreign_addr": ":::*",
+        "state": "LISTEN",
+        "pid": 2110,
+        "program": "java"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "10.20.4.11:5432",
+        "foreign_addr": "10.20.4.12:41882",
+        "state": "ESTABLISHED",
+        "pid": 1901,
+        "program": "postgres"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "10.20.4.11:45118",
+        "foreign_addr": "10.20.4.20:443",
+        "state": "ESTABLISHED",
+        "pid": 2110,
+        "program": "java"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "root",
+      "uid": 0,
+      "gid": 0,
+      "home": "/root",
+      "shell": "/bin/bash",
+      "groups": [
+        "root"
+      ],
+      "password_hash": "!",
+      "last_login": "2026-01-17T03:18:22Z",
+      "last_login_from": "10.20.4.4"
+    },
+    {
+      "username": "postgres",
+      "uid": 107,
+      "gid": 113,
+      "home": "/var/lib/postgresql",
+      "shell": "/bin/bash",
+      "groups": [
+        "postgres",
+        "ssl-cert"
+      ],
+      "password_hash": "!",
+      "last_login": null,
+      "last_login_from": null
+    },
+    {
+      "username": "finapp",
+      "uid": 1002,
+      "gid": 1002,
+      "home": "/home/finapp",
+      "shell": "/bin/bash",
+      "groups": [
+        "finapp",
+        "sudo"
+      ],
+      "password_hash": "$6$aB9cD2eF$hG7kL0mN3pQ5rS8tU1vW4xY6zA9bC2dE5fH8iJ0kL3mN6oP9qR",
+      "last_login": "2026-04-15T07:11:04Z",
+      "last_login_from": "10.20.4.4"
+    }
+  ],
+  "processes": [
+    {
+      "pid": 1,
+      "ppid": 0,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.0,
+      "vsz": 172312,
+      "rss": 13280,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "1:42",
+      "command": "/sbin/init"
+    },
+    {
+      "pid": 488,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.3,
+      "vsz": 98432,
+      "rss": 7744,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "8:14",
+      "command": "/lib/systemd/systemd-journald"
+    },
+    {
+      "pid": 912,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.1,
+      "vsz": 70112,
+      "rss": 6244,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "0:04",
+      "command": "sshd: /usr/sbin/sshd -D"
+    },
+    {
+      "pid": 940,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.0,
+      "vsz": 26412,
+      "rss": 1988,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "0:12",
+      "command": "/usr/sbin/cron -f"
+    },
+    {
+      "pid": 1844,
+      "ppid": 1,
+      "user": "postgres",
+      "cpu_percent": 0.2,
+      "mem_percent": 4.1,
+      "vsz": 2234112,
+      "rss": 218422,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "82:41",
+      "command": "/usr/lib/postgresql/14/bin/postgres -D /var/lib/postgresql/14/main -c config_file=/etc/postgresql/14/main/postgresql.conf"
+    },
+    {
+      "pid": 1890,
+      "ppid": 1844,
+      "user": "postgres",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.4,
+      "vsz": 2221020,
+      "rss": 20128,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "14:02",
+      "command": "postgres: 14/main: checkpointer"
+    },
+    {
+      "pid": 1891,
+      "ppid": 1844,
+      "user": "postgres",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.3,
+      "vsz": 2221020,
+      "rss": 16380,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "11:18",
+      "command": "postgres: 14/main: background writer"
+    },
+    {
+      "pid": 1892,
+      "ppid": 1844,
+      "user": "postgres",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.2,
+      "vsz": 2221020,
+      "rss": 14844,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "9:47",
+      "command": "postgres: 14/main: walwriter"
+    },
+    {
+      "pid": 1893,
+      "ppid": 1844,
+      "user": "postgres",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.3,
+      "vsz": 2222180,
+      "rss": 17112,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "6:20",
+      "command": "postgres: 14/main: autovacuum launcher"
+    },
+    {
+      "pid": 1901,
+      "ppid": 1844,
+      "user": "postgres",
+      "cpu_percent": 0.1,
+      "mem_percent": 0.5,
+      "vsz": 2226488,
+      "rss": 26112,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Jan17",
+      "time": "22:41",
+      "command": "postgres: 14/main: walsender replicator 10.20.4.12(41882) streaming 3/A2E184C0"
+    },
+    {
+      "pid": 2110,
+      "ppid": 1,
+      "user": "finapp",
+      "cpu_percent": 0.9,
+      "mem_percent": 9.2,
+      "vsz": 6128442,
+      "rss": 489224,
+      "tty": "?",
+      "stat": "Ssl",
+      "start": "Jan17",
+      "time": "182:14",
+      "command": "/usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xms512m -Xmx2g -jar /home/finapp/finapp.jar --spring.profiles.active=prod"
+    }
+  ],
+  "filesystem": {
+    "/": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "bin",
+        "boot",
+        "dev",
+        "etc",
+        "home",
+        "lib",
+        "lib64",
+        "media",
+        "mnt",
+        "opt",
+        "proc",
+        "root",
+        "run",
+        "sbin",
+        "srv",
+        "sys",
+        "tmp",
+        "usr",
+        "var"
+      ]
+    },
+    "/etc": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "cron.d",
+        "group",
+        "hostname",
+        "hosts",
+        "os-release",
+        "passwd",
+        "postgresql",
+        "shadow",
+        "ssh"
+      ]
+    },
+    "/etc/hostname": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "size_bytes": 15,
+      "content": "fin-db-prod-01\n"
+    },
+    "/etc/hosts": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 320,
+      "content": "127.0.0.1\tlocalhost\n127.0.1.1\tfin-db-prod-01\n\n10.20.4.11\tfin-db-prod-01.prod.acmecorp.internal fin-db-prod-01\n10.20.4.12\tfin-db-replica-01.prod.acmecorp.internal fin-db-replica-01\n10.20.4.20\tfin-audit.prod.acmecorp.internal fin-audit\n\n::1\tlocalhost ip6-localhost ip6-loopback\nff02::1\tip6-allnodes\nff02::2\tip6-allrouters\n"
+    },
+    "/etc/os-release": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "size_bytes": 382,
+      "content": "NAME=\"Ubuntu\"\nVERSION=\"20.04.6 LTS (Focal Fossa)\"\nID=ubuntu\nID_LIKE=debian\nPRETTY_NAME=\"Ubuntu 20.04.6 LTS\"\nVERSION_ID=\"20.04\"\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nVERSION_CODENAME=focal\nUBUNTU_CODENAME=focal\n"
+    },
+    "/etc/passwd": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 676,
+      "content": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nsync:x:4:65534:sync:/bin:/bin/sync\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsystemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin\nmessagebus:x:102:105::/nonexistent:/usr/sbin/nologin\nsyslog:x:104:110::/home/syslog:/usr/sbin/nologin\nsshd:x:108:65534::/run/sshd:/usr/sbin/nologin\npostgres:x:107:113:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash\nfinapp:x:1002:1002:Finance Application Service,,,:/home/finapp:/bin/bash\n"
+    },
+    "/etc/shadow": {
+      "type": "file",
+      "owner": "root",
+      "group": "shadow",
+      "permissions": "640",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 430,
+      "content": "root:!:19860:0:99999:7:::\ndaemon:*:19860:0:99999:7:::\nbin:*:19860:0:99999:7:::\nsys:*:19860:0:99999:7:::\nsync:*:19860:0:99999:7:::\nwww-data:*:19860:0:99999:7:::\nnobody:*:19860:0:99999:7:::\nsystemd-resolve:*:19860:0:99999:7:::\nmessagebus:*:19860:0:99999:7:::\nsyslog:*:19860:0:99999:7:::\nsshd:*:19860:0:99999:7:::\npostgres:!:19860:0:99999:7:::\nfinapp:$6$aB9cD2eF$hG7kL0mN3pQ5rS8tU1vW4xY6zA9bC2dE5fH8iJ0kL3mN6oP9qR:19860:0:99999:7:::\n"
+    },
+    "/etc/group": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 159,
+      "content": "root:x:0:\ndaemon:x:1:\nbin:x:2:\nsys:x:3:\nadm:x:4:syslog\nsudo:x:27:finapp\nwww-data:x:33:\npostgres:x:113:\nssl-cert:x:114:postgres\nnogroup:x:65534:\nfinapp:x:1002:\n"
+    },
+    "/etc/cron.d": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "fin-backup"
+      ]
+    },
+    "/etc/cron.d/fin-backup": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 316,
+      "content": "# /etc/cron.d/fin-backup — managed by ops\nSHELL=/bin/bash\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n\n0 2 * * * finapp /home/finapp/bin/nightly-backup.sh >> /home/finapp/logs/backup.log 2>&1\n0 */4 * * * finapp /usr/bin/curl -s -o /dev/null https://fin-audit.prod.acmecorp.internal/heartbeat\n"
+    },
+    "/etc/postgresql": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "14"
+      ]
+    },
+    "/etc/postgresql/14": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "main"
+      ]
+    },
+    "/etc/postgresql/14/main": {
+      "type": "directory",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "pg_hba.conf",
+        "postgresql.conf"
+      ]
+    },
+    "/etc/postgresql/14/main/postgresql.conf": {
+      "type": "file",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 643,
+      "content": "# /etc/postgresql/14/main/postgresql.conf (extract)\nlisten_addresses = 'localhost,10.20.4.11'\nport = 5432\nmax_connections = 200\nshared_buffers = 2GB\neffective_cache_size = 6GB\nwork_mem = 16MB\nmaintenance_work_mem = 512MB\nwal_level = replica\narchive_mode = on\narchive_command = 'test ! -f /var/lib/postgresql/14/archive/%f && cp %p /var/lib/postgresql/14/archive/%f'\nlog_destination = 'stderr'\nlogging_collector = on\nlog_directory = '/var/log/postgresql'\nlog_filename = 'postgresql-%a.log'\nlog_min_duration_statement = 250\nssl = on\nssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'\nssl_key_file  = '/etc/ssl/private/ssl-cert-snakeoil.key'\n"
+    },
+    "/etc/postgresql/14/main/pg_hba.conf": {
+      "type": "file",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "640",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 559,
+      "content": "# /etc/postgresql/14/main/pg_hba.conf\nlocal   all             postgres                                peer\nlocal   all             all                                     peer\nhost    finance_prod    finapp_rw       127.0.0.1/32            scram-sha-256\nhost    finance_prod    finapp_ro       127.0.0.1/32            scram-sha-256\nhost    finance_prod    finapp_ro       10.20.4.12/32           scram-sha-256\nhost    replication     replicator      10.20.4.12/32           scram-sha-256\nhost    all             all             0.0.0.0/0               reject\n"
+    },
+    "/home": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "children": [
+        "finapp"
+      ]
+    },
+    "/home/finapp": {
+      "type": "directory",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "750",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "children": [
+        ".bash_history",
+        ".bashrc",
+        ".profile",
+        "bin",
+        "config",
+        "logs",
+        "reports"
+      ]
+    },
+    "/home/finapp/.bash_history": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "600",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "size_bytes": 211,
+      "content": "cd /home/finapp\ntail -f logs/finapp.log\npsql -h localhost -U finapp_ro -d finance_prod\njava -jar finapp.jar --spring.profiles.active=prod\nls reports/\ncat config/database.yml\nsystemctl status finapp.service\nexit\n"
+    },
+    "/home/finapp/.bashrc": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "size_bytes": 336,
+      "content": "# ~/.bashrc for finapp service account\ncase $- in\n    *i*) ;;\n      *) return;;\nesac\n\nHISTCONTROL=ignoreboth\nHISTSIZE=2000\n\nexport JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64\nexport PATH=\"$JAVA_HOME/bin:$PATH\"\nexport FINAPP_HOME=/home/finapp\nexport FINAPP_ENV=prod\n\nalias ll='ls -alF'\nalias logs='tail -f /home/finapp/logs/finapp.log'\n"
+    },
+    "/home/finapp/.profile": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "size_bytes": 96,
+      "content": "# ~/.profile\nif [ -n \"$BASH_VERSION\" ] && [ -f \"$HOME/.bashrc\" ]; then\n    . \"$HOME/.bashrc\"\nfi\n"
+    },
+    "/home/finapp/bin": {
+      "type": "directory",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "children": [
+        "nightly-backup.sh"
+      ]
+    },
+    "/home/finapp/bin/nightly-backup.sh": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "750",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "size_bytes": 352,
+      "content": "#!/bin/bash\n# /home/finapp/bin/nightly-backup.sh\n# Runs via /etc/cron.d/fin-backup at 02:00 UTC nightly.\nset -euo pipefail\n\nDEST=/var/backups/finance\nTS=$(date -u +%Y%m%dT%H%M%SZ)\nmkdir -p \"$DEST\"\n\npg_dump -h localhost -U finapp_ro -Fc finance_prod \\\n  > \"$DEST/finance_prod-${TS}.pgdump\"\n\nfind \"$DEST\" -name 'finance_prod-*.pgdump' -mtime +30 -delete\n"
+    },
+    "/home/finapp/config": {
+      "type": "directory",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "750",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "application.yml",
+        "database.yml"
+      ]
+    },
+    "/home/finapp/config/database.yml": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "600",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 543,
+      "content": "# /home/finapp/config/database.yml\n# Managed by ops. DO NOT EDIT by hand — changes roll through ansible.\nproduction:\n  primary:\n    adapter: postgresql\n    host: localhost\n    port: 5432\n    database: finance_prod\n    username: finapp_rw\n    password: pgS3rvice-2026-Q1-rotation\n    pool: 32\n    sslmode: require\n  replica:\n    adapter: postgresql\n    host: fin-db-replica-01.prod.acmecorp.internal\n    port: 5432\n    database: finance_prod\n    username: finapp_ro\n    password: pgReadOnly-2026-Q1-rotation\n    pool: 16\n    sslmode: require\n"
+    },
+    "/home/finapp/config/application.yml": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "600",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 926,
+      "content": "# /home/finapp/config/application.yml\nspring:\n  application:\n    name: finapp\n  datasource:\n    url: jdbc:postgresql://localhost:5432/finance_prod?sslmode=require\n    username: finapp_rw\n    password: pgS3rvice-2026-Q1-rotation\n    hikari:\n      maximum-pool-size: 32\n      connection-timeout: 5000\n  jpa:\n    hibernate:\n      ddl-auto: validate\n    properties:\n      hibernate:\n        dialect: org.hibernate.dialect.PostgreSQLDialect\nserver:\n  port: 8443\n  ssl:\n    enabled: true\n    key-store: /home/finapp/config/keystore.p12\n    key-store-password: finapp-keystore-2026\n    key-store-type: PKCS12\naudit:\n  destination: /home/finapp/logs/audit.log\n  retention-days: 2555\nintegrations:\n  swift:\n    endpoint: https://swift-gateway.prod.acmecorp.internal/v2\n    api-key: swift_api_prod_fakeonlydoNotUse_x9kL3mN7pQ\n  plaid:\n    client-id: 65a3fakelienttidfortest\n    secret: plaid_prod_fake_do_not_use_this_key_anywhere_real\n"
+    },
+    "/home/finapp/logs": {
+      "type": "directory",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "750",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "children": [
+        "audit.log",
+        "finapp.log"
+      ]
+    },
+    "/home/finapp/logs/finapp.log": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-16T02:00:04Z",
+      "size_bytes": 679,
+      "content": "2026-04-16T02:00:04.102Z INFO  c.a.finapp.Scheduler - nightly batch job started\n2026-04-16T02:00:04.311Z INFO  o.s.orm.jpa.EntityManagerFactoryBuilderImpl - HHH000204: Processing PersistenceUnitInfo\n2026-04-16T02:01:11.887Z INFO  c.a.finapp.BatchJob - reconciled 4812 transactions for 2026-04-15\n2026-04-16T02:01:12.001Z INFO  c.a.finapp.AuditSink - wrote 4812 audit events to /home/finapp/logs/audit.log\n2026-04-16T02:01:12.114Z INFO  c.a.finapp.Scheduler - nightly batch job complete in 67811ms\n2026-04-16T04:00:00.044Z INFO  c.a.finapp.HealthCheck - db=OK replica=OK swift=OK plaid=OK\n2026-04-16T08:00:00.028Z INFO  c.a.finapp.HealthCheck - db=OK replica=OK swift=OK plaid=OK\n"
+    },
+    "/home/finapp/logs/audit.log": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "size_bytes": 433,
+      "content": "2026-04-15T23:11:04Z user=finapp_rw action=SELECT table=transactions rows=124 session=a41f\n2026-04-15T23:12:17Z user=finapp_rw action=INSERT table=transactions rows=1 session=a41f txn_id=txn_021841\n2026-04-15T23:30:02Z user=finapp_ro action=SELECT table=accounts rows=3 session=b18c\n2026-04-16T02:01:12Z user=system action=BATCH_RECONCILE rows=4812 job=nightly_reconcile\n2026-04-16T08:00:00Z user=system action=HEALTHCHECK result=OK\n"
+    },
+    "/home/finapp/reports": {
+      "type": "directory",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "750",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-01T02:00:17Z",
+      "children": [
+        "q1-2026-transactions.csv"
+      ]
+    },
+    "/home/finapp/reports/q1-2026-transactions.csv": {
+      "type": "file",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "640",
+      "created": "2026-04-01T02:00:17Z",
+      "modified": "2026-04-01T02:00:17Z",
+      "size_bytes": 1028,
+      "content": "transaction_id,timestamp,account_from,account_to,amount_usd,currency,status,memo\ntxn_000001,2026-01-02T09:14:02Z,ACCT-48201,ACCT-91045,12450.00,USD,settled,wire-in Q1-payroll\ntxn_000002,2026-01-02T11:02:55Z,ACCT-48201,ACCT-10023,875.42,USD,settled,vendor-bill 9921\ntxn_000003,2026-01-15T14:33:18Z,ACCT-55110,ACCT-48201,310200.00,USD,settled,invoice-INV-2026-0041\ntxn_000004,2026-01-18T08:41:01Z,ACCT-48201,ACCT-72300,4890.75,EUR,settled,eu-supplier-payout\ntxn_000005,2026-02-01T00:00:01Z,ACCT-48201,ACCT-10023,182.10,USD,settled,subscription-renewal\ntxn_000006,2026-02-14T16:22:40Z,ACCT-91045,ACCT-48201,58000.00,USD,settled,customer-refund-reversal\ntxn_000007,2026-02-28T23:59:59Z,ACCT-48201,ACCT-55110,994120.50,USD,settled,quarterly-dividend\ntxn_000008,2026-03-05T10:04:12Z,ACCT-48201,ACCT-83092,2210.00,USD,pending,awaiting-swift-ack\ntxn_000009,2026-03-22T07:18:33Z,ACCT-83092,ACCT-48201,12000.00,GBP,settled,fx-hedge-settlement\ntxn_000010,2026-03-31T19:45:28Z,ACCT-48201,ACCT-91045,450.00,USD,settled,expense-reimbursement\n"
+    },
+    "/root": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "700",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        ".bash_history",
+        ".bashrc"
+      ]
+    },
+    "/root/.bash_history": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "600",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "size_bytes": 118,
+      "content": "apt update\napt upgrade -y\nreboot\nsystemctl status postgresql\nsystemctl status finapp\ntail -n 100 /var/log/syslog\nexit\n"
+    },
+    "/root/.bashrc": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2024-05-18T09:00:00Z",
+      "size_bytes": 92,
+      "content": "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nalias ll='ls -alF'\n"
+    },
+    "/tmp": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "1777",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "children": []
+    },
+    "/var": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "backups",
+        "lib",
+        "log",
+        "tmp"
+      ]
+    },
+    "/var/backups": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-16T02:00:04Z",
+      "children": [
+        "finance"
+      ]
+    },
+    "/var/backups/finance": {
+      "type": "directory",
+      "owner": "finapp",
+      "group": "finapp",
+      "permissions": "750",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-16T02:00:04Z",
+      "children": []
+    },
+    "/var/lib": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "postgresql"
+      ]
+    },
+    "/var/lib/postgresql": {
+      "type": "directory",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "14"
+      ]
+    },
+    "/var/lib/postgresql/14": {
+      "type": "directory",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-01-17T03:14:22Z",
+      "children": [
+        "main"
+      ]
+    },
+    "/var/lib/postgresql/14/main": {
+      "type": "directory",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "700",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-16T02:00:04Z",
+      "children": []
+    },
+    "/var/log": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "children": [
+        "auth.log",
+        "postgresql",
+        "syslog"
+      ]
+    },
+    "/var/log/auth.log": {
+      "type": "file",
+      "owner": "root",
+      "group": "adm",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "size_bytes": 556,
+      "content": "Apr 15 07:11:04 fin-db-prod-01 sshd[11203]: Accepted publickey for finapp from 10.20.4.4 port 51221\nApr 15 07:11:04 fin-db-prod-01 sshd[11203]: pam_unix(sshd:session): session opened for user finapp by (uid=0)\nApr 15 19:00:04 fin-db-prod-01 sudo:   finapp : TTY=pts/1 ; PWD=/home/finapp ; USER=root ; COMMAND=/bin/systemctl restart finapp.service\nApr 16 02:00:04 fin-db-prod-01 CRON[28411]: pam_unix(cron:session): session opened for user finapp by (uid=0)\nApr 16 02:01:12 fin-db-prod-01 CRON[28411]: pam_unix(cron:session): session closed for user finapp\n"
+    },
+    "/var/log/syslog": {
+      "type": "file",
+      "owner": "syslog",
+      "group": "adm",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "size_bytes": 422,
+      "content": "Apr 16 02:00:04 fin-db-prod-01 CRON[28411]: (finapp) CMD (/home/finapp/bin/nightly-backup.sh)\nApr 16 02:01:12 fin-db-prod-01 postgres[1844]: [1012-1] LOG:  checkpoint complete: wrote 4812 buffers (2.9%)\nApr 16 04:00:00 fin-db-prod-01 systemd[1]: Starting Daily apt download activities...\nApr 16 04:00:02 fin-db-prod-01 systemd[1]: apt-daily.service: Succeeded.\nApr 16 08:00:00 fin-db-prod-01 finapp[2110]: health check OK\n"
+    },
+    "/var/log/postgresql": {
+      "type": "directory",
+      "owner": "postgres",
+      "group": "postgres",
+      "permissions": "755",
+      "created": "2024-05-18T09:00:00Z",
+      "modified": "2026-04-15T23:58:59Z",
+      "children": []
+    }
+  },
+  "disk": {
+    "total_gb": 500,
+    "used_gb": 188.4,
+    "available_gb": 286.2,
+    "use_percent": 40,
+    "filesystem": "/dev/mapper/vg0-root",
+    "mount": "/"
+  },
+  "memory": {
+    "total_mb": 16384,
+    "used_mb": 9812,
+    "free_mb": 1204,
+    "shared_mb": 412,
+    "buff_cache_mb": 5368,
+    "available_mb": 5984
+  },
+  "environment_defaults": {
+    "finapp": {
+      "USER": "finapp",
+      "HOME": "/home/finapp",
+      "SHELL": "/bin/bash",
+      "PATH": "/usr/lib/jvm/java-17-openjdk-amd64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/home/finapp",
+      "PS1": "finapp@fin-db-prod-01:~$ ",
+      "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+      "FINAPP_HOME": "/home/finapp",
+      "FINAPP_ENV": "prod"
+    },
+    "postgres": {
+      "USER": "postgres",
+      "HOME": "/var/lib/postgresql",
+      "SHELL": "/bin/bash",
+      "PATH": "/usr/lib/postgresql/14/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/var/lib/postgresql",
+      "PS1": "postgres@fin-db-prod-01:~$ ",
+      "PGDATA": "/var/lib/postgresql/14/main"
+    },
+    "root": {
+      "USER": "root",
+      "HOME": "/root",
+      "SHELL": "/bin/bash",
+      "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/root",
+      "PS1": "root@fin-db-prod-01:~# "
+    }
+  }
+}

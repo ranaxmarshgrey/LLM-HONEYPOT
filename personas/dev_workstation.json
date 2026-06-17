@@ -1,0 +1,737 @@
+{
+  "persona_id": "dev_workstation",
+  "display_name": "Developer Workstation",
+  "threat_trigger_level": "medium",
+  "schema_version": 1,
+  "system": {
+    "hostname": "dev-workstation-07",
+    "os": "Ubuntu 22.04.3 LTS",
+    "kernel": "5.15.0-88-generic",
+    "arch": "x86_64",
+    "uptime_seconds": 432000,
+    "boot_time": "2026-04-11T09:04:17Z",
+    "timezone": "UTC",
+    "locale": "en_US.UTF-8"
+  },
+  "network": {
+    "interfaces": [
+      {
+        "name": "eth0",
+        "ip": "10.0.2.88",
+        "mac": "08:00:27:91:4e:bd",
+        "netmask": "255.255.255.0",
+        "broadcast": "10.0.2.255",
+        "state": "UP",
+        "rx_bytes": 24834912,
+        "tx_bytes": 18221047
+      },
+      {
+        "name": "docker0",
+        "ip": "172.17.0.1",
+        "mac": "02:42:a1:b2:c3:d4",
+        "netmask": "255.255.0.0",
+        "broadcast": null,
+        "state": "UP",
+        "rx_bytes": 148272,
+        "tx_bytes": 92401
+      },
+      {
+        "name": "lo",
+        "ip": "127.0.0.1",
+        "mac": "00:00:00:00:00:00",
+        "netmask": "255.0.0.0",
+        "broadcast": null,
+        "state": "UP",
+        "rx_bytes": 104928,
+        "tx_bytes": 104928
+      }
+    ],
+    "open_ports": [
+      22,
+      3000,
+      8080
+    ],
+    "active_connections": [
+      {
+        "proto": "tcp",
+        "local_addr": "0.0.0.0:22",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 748,
+        "program": "sshd"
+      },
+      {
+        "proto": "tcp6",
+        "local_addr": ":::22",
+        "foreign_addr": ":::*",
+        "state": "LISTEN",
+        "pid": 748,
+        "program": "sshd"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "127.0.0.1:3000",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 2341,
+        "program": "node"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "0.0.0.0:8080",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 3012,
+        "program": "code-server"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "10.0.2.88:50412",
+        "foreign_addr": "140.82.114.4:443",
+        "state": "ESTABLISHED",
+        "pid": 2890,
+        "program": "git"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "root",
+      "uid": 0,
+      "gid": 0,
+      "home": "/root",
+      "shell": "/bin/bash",
+      "groups": [
+        "root"
+      ],
+      "password_hash": "!",
+      "last_login": "2026-03-02T14:12:09Z",
+      "last_login_from": null
+    },
+    {
+      "username": "john.dev",
+      "uid": 1001,
+      "gid": 1001,
+      "home": "/home/john.dev",
+      "shell": "/bin/bash",
+      "groups": [
+        "john.dev",
+        "sudo",
+        "docker",
+        "adm"
+      ],
+      "password_hash": "$6$dV3xN8qW$kL2mP9vT7rY4sA1bC6eH5iJ3oU0zX8fG2hK4nM5wQ",
+      "last_login": "2026-04-15T08:12:03Z",
+      "last_login_from": "10.0.2.88"
+    }
+  ],
+  "processes": [
+    {
+      "pid": 1,
+      "ppid": 0,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.1,
+      "vsz": 169440,
+      "rss": 13512,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Apr11",
+      "time": "0:04",
+      "command": "/sbin/init splash"
+    },
+    {
+      "pid": 412,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.4,
+      "vsz": 104168,
+      "rss": 8432,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Apr11",
+      "time": "0:02",
+      "command": "/lib/systemd/systemd-journald"
+    },
+    {
+      "pid": 748,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.1,
+      "vsz": 72296,
+      "rss": 6420,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Apr11",
+      "time": "0:00",
+      "command": "sshd: /usr/sbin/sshd -D"
+    },
+    {
+      "pid": 812,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.0,
+      "vsz": 25552,
+      "rss": 1812,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Apr11",
+      "time": "0:00",
+      "command": "/usr/sbin/cron -f"
+    },
+    {
+      "pid": 1023,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.3,
+      "mem_percent": 1.8,
+      "vsz": 1834272,
+      "rss": 94328,
+      "tty": "?",
+      "stat": "Ssl",
+      "start": "Apr11",
+      "time": "2:41",
+      "command": "/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock"
+    },
+    {
+      "pid": 1045,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.1,
+      "mem_percent": 0.9,
+      "vsz": 1214776,
+      "rss": 46112,
+      "tty": "?",
+      "stat": "Ssl",
+      "start": "Apr11",
+      "time": "1:12",
+      "command": "/usr/bin/containerd"
+    },
+    {
+      "pid": 2341,
+      "ppid": 1890,
+      "user": "john.dev",
+      "cpu_percent": 0.4,
+      "mem_percent": 2.3,
+      "vsz": 742316,
+      "rss": 118432,
+      "tty": "pts/0",
+      "stat": "Sl",
+      "start": "09:14",
+      "time": "0:08",
+      "command": "node --watch server.js"
+    },
+    {
+      "pid": 2890,
+      "ppid": 1890,
+      "user": "john.dev",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.3,
+      "vsz": 22914,
+      "rss": 8120,
+      "tty": "pts/1",
+      "stat": "S",
+      "start": "10:02",
+      "time": "0:00",
+      "command": "npm run dev"
+    },
+    {
+      "pid": 3012,
+      "ppid": 1,
+      "user": "john.dev",
+      "cpu_percent": 0.2,
+      "mem_percent": 3.1,
+      "vsz": 912044,
+      "rss": 152882,
+      "tty": "?",
+      "stat": "Ssl",
+      "start": "Apr11",
+      "time": "3:14",
+      "command": "/home/john.dev/.local/bin/code-server --host 0.0.0.0 --port 8080"
+    }
+  ],
+  "filesystem": {
+    "/": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "children": [
+        "bin",
+        "boot",
+        "dev",
+        "etc",
+        "home",
+        "lib",
+        "lib64",
+        "media",
+        "mnt",
+        "opt",
+        "proc",
+        "root",
+        "run",
+        "sbin",
+        "srv",
+        "sys",
+        "tmp",
+        "usr",
+        "var"
+      ]
+    },
+    "/etc": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "children": [
+        "docker",
+        "group",
+        "hostname",
+        "hosts",
+        "os-release",
+        "passwd",
+        "shadow",
+        "ssh"
+      ]
+    },
+    "/etc/hostname": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 19,
+      "content": "dev-workstation-07\n"
+    },
+    "/etc/hosts": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 135,
+      "content": "127.0.0.1\tlocalhost\n127.0.1.1\tdev-workstation-07\n\n::1\tlocalhost ip6-localhost ip6-loopback\nff02::1\tip6-allnodes\nff02::2\tip6-allrouters\n"
+    },
+    "/etc/os-release": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 302,
+      "content": "NAME=\"Ubuntu\"\nVERSION=\"22.04.3 LTS (Jammy Jellyfish)\"\nID=ubuntu\nID_LIKE=debian\nPRETTY_NAME=\"Ubuntu 22.04.3 LTS\"\nVERSION_ID=\"22.04\"\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nVERSION_CODENAME=jammy\nUBUNTU_CODENAME=jammy\n"
+    },
+    "/etc/passwd": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "size_bytes": 639,
+      "content": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nsync:x:4:65534:sync:/bin:/bin/sync\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsystemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin\nmessagebus:x:102:105::/nonexistent:/usr/sbin/nologin\nsyslog:x:104:110::/home/syslog:/usr/sbin/nologin\nsshd:x:108:65534::/run/sshd:/usr/sbin/nologin\ndocker:x:999:999::/home/docker:/usr/sbin/nologin\njohn.dev:x:1001:1001:John Developer,,,:/home/john.dev:/bin/bash\n"
+    },
+    "/etc/shadow": {
+      "type": "file",
+      "owner": "root",
+      "group": "shadow",
+      "permissions": "640",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "size_bytes": 421,
+      "content": "root:!:20000:0:99999:7:::\ndaemon:*:20000:0:99999:7:::\nbin:*:20000:0:99999:7:::\nsys:*:20000:0:99999:7:::\nsync:*:20000:0:99999:7:::\nwww-data:*:20000:0:99999:7:::\nnobody:*:20000:0:99999:7:::\nsystemd-resolve:*:20000:0:99999:7:::\nmessagebus:*:20000:0:99999:7:::\nsyslog:*:20000:0:99999:7:::\nsshd:*:20000:0:99999:7:::\ndocker:*:20000:0:99999:7:::\njohn.dev:$6$dV3xN8qW$kL2mP9vT7rY4sA1bC6eH5iJ3oU0zX8fG2hK4nM5wQ:20000:0:99999:7:::\n"
+    },
+    "/etc/group": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "size_bytes": 154,
+      "content": "root:x:0:\ndaemon:x:1:\nbin:x:2:\nsys:x:3:\nadm:x:4:syslog,john.dev\nsudo:x:27:john.dev\nwww-data:x:33:\ndocker:x:999:john.dev\nnogroup:x:65534:\njohn.dev:x:1001:\n"
+    },
+    "/home": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "children": [
+        "john.dev"
+      ]
+    },
+    "/home/john.dev": {
+      "type": "directory",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "750",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "children": [
+        ".bash_history",
+        ".bashrc",
+        ".gitconfig",
+        ".profile",
+        ".ssh",
+        "projects"
+      ]
+    },
+    "/home/john.dev/.bash_history": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "600",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 227,
+      "content": "cd projects/webapp\ngit status\nnpm install\nnpm run dev\ndocker-compose up -d\ndocker ps\ncode .\ngit add .\ngit commit -m 'fix login bug'\ngit push origin develop\npsql -h staging-db.internal -U webapp\nkubectl get pods -n staging\nexit\n"
+    },
+    "/home/john.dev/.bashrc": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 355,
+      "content": "# ~/.bashrc\ncase $- in\n    *i*) ;;\n      *) return;;\nesac\n\nHISTCONTROL=ignoreboth\nHISTSIZE=5000\nHISTFILESIZE=10000\n\nexport NVM_DIR=\"$HOME/.nvm\"\n[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"\n\nalias ll='ls -alF'\nalias gs='git status'\nalias gp='git pull'\nalias dc='docker-compose'\nalias k='kubectl'\n\nexport EDITOR=code\nexport PATH=\"$HOME/.local/bin:$PATH\"\n"
+    },
+    "/home/john.dev/.profile": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 177,
+      "content": "# ~/.profile\nif [ -n \"$BASH_VERSION\" ]; then\n    if [ -f \"$HOME/.bashrc\" ]; then\n        . \"$HOME/.bashrc\"\n    fi\nfi\n\nif [ -d \"$HOME/bin\" ] ; then\n    PATH=\"$HOME/bin:$PATH\"\nfi\n"
+    },
+    "/home/john.dev/.gitconfig": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 192,
+      "content": "[user]\n\tname = John Developer\n\temail = john.dev@acmecorp.internal\n[core]\n\teditor = code --wait\n[push]\n\tdefault = current\n[pull]\n\trebase = true\n[alias]\n\tst = status\n\tco = checkout\n\tbr = branch\n"
+    },
+    "/home/john.dev/.ssh": {
+      "type": "directory",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "700",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "children": [
+        "authorized_keys",
+        "id_rsa",
+        "id_rsa.pub",
+        "known_hosts"
+      ]
+    },
+    "/home/john.dev/.ssh/id_rsa": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "600",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 351,
+      "content": "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn\nNhAAAAAwEAAQAAAYEAwZKj5QnDQfakeExampleOnlyDoNotUseThisKeyAnywhereReal\nVeryLongBase64EncodedDataHereButThisIsJustAHoneypotLureForAttackersXx\nNotARealKeyDoNotTryToUseItForAnythingItDoesNotWorkThisIsFakeFakeFakeQ\n-----END OPENSSH PRIVATE KEY-----\n"
+    },
+    "/home/john.dev/.ssh/id_rsa.pub": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 185,
+      "content": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDBkqPlCcNB9qR4TampleOnlyDoNotUseThisKeyAnywhereRealVeryLongBase64EncodedDataHereButThisIsJustAHoneypotLureForAttackers john.dev@dev-workstation-07\n"
+    },
+    "/home/john.dev/.ssh/authorized_keys": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "600",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 153,
+      "content": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCxyz789FakeKeyExampleForHoneypotLureDoNotUseThisKeyAnywhereRealAttackersMightTryButItWillNotWorkXy john.dev@laptop\n"
+    },
+    "/home/john.dev/projects": {
+      "type": "directory",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "children": [
+        "webapp"
+      ]
+    },
+    "/home/john.dev/projects/webapp": {
+      "type": "directory",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "children": [
+        ".env",
+        ".git",
+        "Dockerfile",
+        "README.md",
+        "docker-compose.yml",
+        "package.json",
+        "server.js"
+      ]
+    },
+    "/home/john.dev/projects/webapp/.env": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "600",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 666,
+      "content": "# WebApp development environment\nNODE_ENV=development\nPORT=3000\n\n# Database\nDB_HOST=staging-db.internal.acmecorp.net\nDB_PORT=5432\nDB_NAME=webapp_staging\nDB_USER=webapp_svc\nDB_PASSWORD=S3cret-P@ssw0rd-2026-!rotate-me\n\n# Redis\nREDIS_URL=redis://:cache-pw-8812@staging-redis.internal:6379/0\n\n# External APIs\nSTRIPE_API_KEY=sk_test_4eC39HqLyjWDarjtT1zdp7dcFAKEFAKEFAKE\nSENDGRID_API_KEY=SG.fakesendgridkeyjustalurebutlookslegitimate.xxxxxxxxxxxx\nJWT_SECRET=dev-only-jwt-signing-secret-do-not-ship\nAWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\nAWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\n\n# Feature flags\nFEATURE_NEW_DASHBOARD=true\nFEATURE_BETA_CHECKOUT=false\n"
+    },
+    "/home/john.dev/projects/webapp/README.md": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 246,
+      "content": "# Internal WebApp\n\nInternal dashboard for the operations team.\n\n## Quick start\n\n```bash\nnpm install\ncp .env.example .env   # fill in secrets\ndocker-compose up -d   # start postgres + redis\nnpm run dev\n```\n\nServed on http://localhost:3000 in dev.\n"
+    },
+    "/home/john.dev/projects/webapp/package.json": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 444,
+      "content": "{\n  \"name\": \"webapp\",\n  \"version\": \"1.4.2\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"node --watch server.js\",\n    \"start\": \"node server.js\",\n    \"test\": \"jest\",\n    \"lint\": \"eslint .\"\n  },\n  \"dependencies\": {\n    \"express\": \"^4.19.2\",\n    \"pg\": \"^8.11.3\",\n    \"redis\": \"^4.6.12\",\n    \"dotenv\": \"^16.4.5\",\n    \"jsonwebtoken\": \"^9.0.2\",\n    \"bcrypt\": \"^5.1.1\"\n  },\n  \"devDependencies\": {\n    \"jest\": \"^29.7.0\",\n    \"eslint\": \"^8.57.0\"\n  }\n}\n"
+    },
+    "/home/john.dev/projects/webapp/Dockerfile": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 144,
+      "content": "FROM node:20-alpine\n\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\n\nCOPY . .\n\nEXPOSE 3000\nUSER node\nCMD [\"node\", \"server.js\"]\n"
+    },
+    "/home/john.dev/projects/webapp/docker-compose.yml": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 344,
+      "content": "version: '3.8'\nservices:\n  postgres:\n    image: postgres:15\n    environment:\n      POSTGRES_DB: webapp_dev\n      POSTGRES_USER: webapp\n      POSTGRES_PASSWORD: dev-local-pw\n    ports:\n      - '5432:5432'\n    volumes:\n      - pg_data:/var/lib/postgresql/data\n  redis:\n    image: redis:7-alpine\n    ports:\n      - '6379:6379'\nvolumes:\n  pg_data:\n"
+    },
+    "/home/john.dev/projects/webapp/server.js": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 652,
+      "content": "const express = require('express');\nconst { Pool } = require('pg');\nrequire('dotenv').config();\n\nconst app = express();\nconst pool = new Pool({\n  host: process.env.DB_HOST,\n  port: process.env.DB_PORT,\n  database: process.env.DB_NAME,\n  user: process.env.DB_USER,\n  password: process.env.DB_PASSWORD,\n});\n\napp.get('/health', (req, res) => res.send('ok'));\n\napp.get('/users/:id', async (req, res) => {\n  const { rows } = await pool.query('SELECT id, email FROM users WHERE id = $1', [req.params.id]);\n  res.json(rows[0] || null);\n});\n\napp.listen(process.env.PORT || 3000, () => {\n  console.log('webapp listening on :' + (process.env.PORT || 3000));\n});\n"
+    },
+    "/home/john.dev/projects/webapp/.git": {
+      "type": "directory",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "children": [
+        "HEAD",
+        "config"
+      ]
+    },
+    "/home/john.dev/projects/webapp/.git/config": {
+      "type": "file",
+      "owner": "john.dev",
+      "group": "john.dev",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T18:22:14Z",
+      "size_bytes": 275,
+      "content": "[core]\n\trepositoryformatversion = 0\n\tfilemode = true\n\tbare = false\n\tlogallrefupdates = true\n[remote \"origin\"]\n\turl = git@github.acmecorp.internal:platform/webapp.git\n\tfetch = +refs/heads/*:refs/remotes/origin/*\n[branch \"develop\"]\n\tremote = origin\n\tmerge = refs/heads/develop\n"
+    },
+    "/root": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "700",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "children": [
+        ".bash_history",
+        ".bashrc"
+      ]
+    },
+    "/root/.bash_history": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "600",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "size_bytes": 93,
+      "content": "apt update\napt install -y docker.io\nusermod -aG docker john.dev\nsystemctl enable docker\nexit\n"
+    },
+    "/root/.bashrc": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2025-09-01T10:00:00Z",
+      "size_bytes": 92,
+      "content": "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nalias ll='ls -alF'\n"
+    },
+    "/tmp": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "1777",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "children": []
+    },
+    "/var": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "children": [
+        "cache",
+        "lib",
+        "log",
+        "tmp"
+      ]
+    },
+    "/var/log": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "children": [
+        "auth.log",
+        "dpkg.log",
+        "syslog"
+      ]
+    },
+    "/var/log/auth.log": {
+      "type": "file",
+      "owner": "root",
+      "group": "adm",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "size_bytes": 431,
+      "content": "Apr 15 08:12:03 dev-workstation-07 sshd[1823]: Accepted publickey for john.dev from 10.0.2.88 port 50421\nApr 15 08:12:03 dev-workstation-07 sshd[1823]: pam_unix(sshd:session): session opened for user john.dev by (uid=0)\nApr 15 17:01:01 dev-workstation-07 CRON[2841]: pam_unix(cron:session): session opened for user root by (uid=0)\nApr 15 17:01:01 dev-workstation-07 CRON[2841]: pam_unix(cron:session): session closed for user root\n"
+    },
+    "/var/log/syslog": {
+      "type": "file",
+      "owner": "syslog",
+      "group": "adm",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "size_bytes": 371,
+      "content": "Apr 15 09:04:17 dev-workstation-07 systemd[1]: Started Docker Application Container Engine.\nApr 15 09:04:19 dev-workstation-07 dockerd[1023]: level=info msg=\"API listen on /run/docker.sock\"\nApr 15 17:01:01 dev-workstation-07 CRON[2841]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)\nApr 15 23:59:01 dev-workstation-07 systemd[1]: logrotate.service: Succeeded.\n"
+    },
+    "/var/lib": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "children": [
+        "docker",
+        "dpkg"
+      ]
+    },
+    "/var/lib/docker": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "710",
+      "created": "2025-09-01T10:00:00Z",
+      "modified": "2026-03-02T14:12:09Z",
+      "children": [
+        "containers",
+        "image",
+        "volumes"
+      ]
+    }
+  },
+  "disk": {
+    "total_gb": 120,
+    "used_gb": 43.7,
+    "available_gb": 70.4,
+    "use_percent": 37,
+    "filesystem": "/dev/nvme0n1p2",
+    "mount": "/"
+  },
+  "memory": {
+    "total_mb": 8192,
+    "used_mb": 3842,
+    "free_mb": 921,
+    "shared_mb": 288,
+    "buff_cache_mb": 3429,
+    "available_mb": 3847
+  },
+  "environment_defaults": {
+    "john.dev": {
+      "USER": "john.dev",
+      "HOME": "/home/john.dev",
+      "SHELL": "/bin/bash",
+      "PATH": "/home/john.dev/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/home/john.dev/projects/webapp",
+      "PS1": "john.dev@dev-workstation-07:~/projects/webapp$ ",
+      "EDITOR": "code",
+      "NVM_DIR": "/home/john.dev/.nvm"
+    },
+    "root": {
+      "USER": "root",
+      "HOME": "/root",
+      "SHELL": "/bin/bash",
+      "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/root",
+      "PS1": "root@dev-workstation-07:~# "
+    }
+  }
+}

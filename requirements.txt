@@ -1,0 +1,33 @@
+# Core
+python-dotenv>=1.0.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# LLM APIs (Module 3)
+anthropic>=0.25.0
+openai>=1.14.0
+
+# HTTP / external APIs (Module 5 — AbuseIPDB)
+httpx>=0.27.0
+aiohttp>=3.9.0
+
+# Session store (Module 2)
+redis>=5.0.0
+
+# Dashboard (Sprint 6)
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+jinja2>=3.1.0
+websockets>=12.0
+
+# Logging / persistence
+aiofiles>=23.2.0
+python-json-logger>=2.0.7
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+paramiko>=3.4.0
+
+# Note: Cowrie is installed separately in its own virtualenv per upstream docs —
+# do NOT pin it here. See scripts/setup.sh.

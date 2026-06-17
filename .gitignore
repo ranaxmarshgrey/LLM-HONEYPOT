@@ -1,0 +1,49 @@
+# Environment / secrets
+.env
+*.env.local
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Logs (never commit attacker data)
+event_logging/logs/
+logs/
+*.log
+*.log.*
+
+# Cowrie submodule local state
+cowrie/var/
+cowrie/dl/
+cowrie/log/
+cowrie/etc/cowrie.cfg
+
+# SQLite / local DBs
+*.sqlite
+*.sqlite3
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Build
+build/
+dist/
