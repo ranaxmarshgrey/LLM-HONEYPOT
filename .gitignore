@@ -47,3 +47,9 @@ cowrie/etc/cowrie.cfg
 # Build
 build/
 dist/
+
+# Node / Next.js frontend
+node_modules/
+.next/
+next-env.d.ts
+.vercel/
