@@ -23,6 +23,7 @@ from dictionary.command_handlers import SimpleSession
 from honeypot.fakefs import FakeFS
 from honeypot.response_engine import (
     ResponseEngine,
+    _detect_llm_provider,
     apply_timing_jitter,
     build_llm_prompt,
     call_llm_with_fallback,
@@ -217,12 +218,64 @@ class TestTimingJitter:
 
 
 # ---------------------------------------------------------------------------
+# LLM provider detection
+# ---------------------------------------------------------------------------
+
+class TestLlmProviderDetection:
+    def test_gemini_key_preferred(self):
+        old_g = os.environ.pop("GEMINI_API_KEY", None)
+        old_a = os.environ.pop("ANTHROPIC_API_KEY", None)
+        try:
+            os.environ["GEMINI_API_KEY"] = "test-gemini"
+            os.environ["ANTHROPIC_API_KEY"] = "test-anthropic"
+            provider, key = _detect_llm_provider()
+            assert provider == "gemini"
+            assert key == "test-gemini"
+        finally:
+            os.environ.pop("GEMINI_API_KEY", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            if old_g:
+                os.environ["GEMINI_API_KEY"] = old_g
+            if old_a:
+                os.environ["ANTHROPIC_API_KEY"] = old_a
+
+    def test_anthropic_fallback(self):
+        old_g = os.environ.pop("GEMINI_API_KEY", None)
+        old_a = os.environ.pop("ANTHROPIC_API_KEY", None)
+        try:
+            os.environ["ANTHROPIC_API_KEY"] = "test-anthropic"
+            provider, key = _detect_llm_provider()
+            assert provider == "anthropic"
+            assert key == "test-anthropic"
+        finally:
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            if old_g:
+                os.environ["GEMINI_API_KEY"] = old_g
+            if old_a:
+                os.environ["ANTHROPIC_API_KEY"] = old_a
+
+    def test_no_keys_returns_none(self):
+        old_g = os.environ.pop("GEMINI_API_KEY", None)
+        old_a = os.environ.pop("ANTHROPIC_API_KEY", None)
+        try:
+            provider, key = _detect_llm_provider()
+            assert provider == "none"
+            assert key == ""
+        finally:
+            if old_g:
+                os.environ["GEMINI_API_KEY"] = old_g
+            if old_a:
+                os.environ["ANTHROPIC_API_KEY"] = old_a
+
+
+# ---------------------------------------------------------------------------
 # LLM fallback (no API key)
 # ---------------------------------------------------------------------------
 
 class TestLlmFallback:
     def test_no_api_key_returns_fallback(self):
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system", "user", "nmap"
@@ -233,9 +286,12 @@ class TestLlmFallback:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
     def test_fallback_empty_binary(self):
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system", "user", ""
@@ -245,6 +301,8 @@ class TestLlmFallback:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
 
 # ---------------------------------------------------------------------------
@@ -307,6 +365,7 @@ class TestResponseEngineLlmPath:
     def test_unknown_command_goes_to_llm_path(self, engine_ctx):
         engine, fs, sess = engine_ctx
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             response, source, _ = _run(engine.handle_command("nmap -sV 10.0.0.1", sess))
             assert source == "fallback"
@@ -314,6 +373,8 @@ class TestResponseEngineLlmPath:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
 
 # ---------------------------------------------------------------------------
@@ -418,6 +479,7 @@ class TestAdversarialInputs:
     def test_chained_unknown_commands(self, engine_ctx):
         engine, fs, sess = engine_ctx
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             response, source, _ = _run(engine.handle_command(
                 "nmap 10.0.0.1; nikto -h 10.0.0.1; hydra -l root", sess
@@ -426,10 +488,13 @@ class TestAdversarialInputs:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
     def test_chained_mixed_known_unknown(self, engine_ctx):
         engine, fs, sess = engine_ctx
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             response, source, _ = _run(engine.handle_command(
                 "whoami; nmap 10.0.0.1; pwd", sess
@@ -439,6 +504,8 @@ class TestAdversarialInputs:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
     def test_subshell_syntax(self, engine_ctx):
         engine, fs, sess = engine_ctx
@@ -608,6 +675,7 @@ class TestTimeoutFallback:
     def test_tiny_timeout_returns_fallback(self):
         """Setting timeout to 0.001s must trigger fallback, not crash."""
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system prompt", "user msg", "nmap", timeout=0.001
@@ -617,10 +685,13 @@ class TestTimeoutFallback:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
     def test_zero_timeout_returns_fallback(self):
         """Timeout=0 is degenerate but must not crash."""
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system prompt", "user msg", "curl", timeout=0
@@ -630,10 +701,13 @@ class TestTimeoutFallback:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini
 
     def test_negative_timeout_returns_fallback(self):
         """Negative timeout is nonsensical but must not crash."""
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system prompt", "user msg", "wget", timeout=-1
@@ -643,3 +717,5 @@ class TestTimeoutFallback:
         finally:
             if old is not None:
                 os.environ["ANTHROPIC_API_KEY"] = old
+            if old_gemini is not None:
+                os.environ["GEMINI_API_KEY"] = old_gemini

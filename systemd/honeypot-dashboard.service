@@ -1,0 +1,23 @@
+[Unit]
+Description=Adaptive Honeypot Dashboard (FastAPI + WebSocket)
+After=network.target cowrie.service
+Wants=cowrie.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/adaptive-honeypot
+EnvironmentFile=-/opt/adaptive-honeypot/.env
+Environment=PYTHONPATH=/opt/adaptive-honeypot
+ExecStart=/opt/adaptive-honeypot/.venv/bin/uvicorn \
+    dashboard.app:app \
+    --host 0.0.0.0 \
+    --port 8080 \
+    --log-level info
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(wc -l /c/Users/Jeevitha/OneDrive/Documents/CAPSTONE/adaptive-honeypot/tests/*.py)"
-    ]
-  }
-}

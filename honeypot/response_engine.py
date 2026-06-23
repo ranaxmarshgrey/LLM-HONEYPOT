@@ -136,13 +136,77 @@ def build_llm_prompt(
 # LLM caller with timeout and fallback (CLAUDE.md Rule 3)
 # ---------------------------------------------------------------------------
 
+def _detect_llm_provider() -> Tuple[str, str]:
+    """Return ``(provider, api_key)`` for the first available LLM backend.
+
+    Priority order: GEMINI_API_KEY → ANTHROPIC_API_KEY → ("none", "").
+    """
+    gemini_key = os.environ.get("GEMINI_API_KEY", "")
+    if gemini_key:
+        return "gemini", gemini_key
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if anthropic_key:
+        return "anthropic", anthropic_key
+    return "none", ""
+
+
+async def _call_gemini(
+    system_msg: str,
+    user_msg: str,
+    api_key: str,
+    timeout: float,
+) -> str:
+    """Call Google Gemini API and return the response text."""
+    import google.generativeai as genai
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(
+        model_name=os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+        system_instruction=system_msg,
+    )
+
+    loop = asyncio.get_event_loop()
+    response = await asyncio.wait_for(
+        loop.run_in_executor(
+            None, lambda: model.generate_content(user_msg),
+        ),
+        timeout=timeout,
+    )
+    return response.text if response.text else ""
+
+
+async def _call_anthropic(
+    system_msg: str,
+    user_msg: str,
+    api_key: str,
+    timeout: float,
+) -> str:
+    """Call Anthropic Claude API and return the response text."""
+    import anthropic
+
+    client = anthropic.AsyncAnthropic(api_key=api_key)
+    response = await asyncio.wait_for(
+        client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            system=system_msg,
+            messages=[{"role": "user", "content": user_msg}],
+        ),
+        timeout=timeout,
+    )
+    return response.content[0].text if response.content else ""
+
+
 async def call_llm_with_fallback(
     system_msg: str,
     user_msg: str,
     binary: str,
     timeout: float = LLM_TIMEOUT_SECONDS,
 ) -> Tuple[str, str]:
-    """Call the Anthropic Claude API with a strict timeout.
+    """Call the best available LLM API with a strict timeout.
+
+    Provider priority: GEMINI_API_KEY → ANTHROPIC_API_KEY.
+    If neither key is set, returns a fallback bash error immediately.
 
     Args:
         system_msg: The system prompt.
@@ -154,34 +218,25 @@ async def call_llm_with_fallback(
         A ``(response_text, source)`` tuple where source is
         ``"llm"`` on success or ``"fallback"`` on timeout/error.
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        logger.warning("ANTHROPIC_API_KEY not set — using fallback")
+    provider, api_key = _detect_llm_provider()
+
+    if provider == "none":
+        logger.warning("No LLM API key set (GEMINI_API_KEY or ANTHROPIC_API_KEY) — using fallback")
         return _fallback_response(binary), "fallback"
 
     try:
-        import anthropic
+        if provider == "gemini":
+            text = await _call_gemini(system_msg, user_msg, api_key, timeout)
+        else:
+            text = await _call_anthropic(system_msg, user_msg, api_key, timeout)
 
-        client = anthropic.AsyncAnthropic(api_key=api_key)
-
-        response = await asyncio.wait_for(
-            client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=1024,
-                system=system_msg,
-                messages=[{"role": "user", "content": user_msg}],
-            ),
-            timeout=timeout,
-        )
-
-        text = response.content[0].text if response.content else ""
         return text, "llm"
 
     except asyncio.TimeoutError:
-        logger.warning("LLM call timed out after %.1fs", timeout)
+        logger.warning("LLM call (%s) timed out after %.1fs", provider, timeout)
         return _fallback_response(binary), "fallback"
     except Exception as exc:
-        logger.error("LLM call failed: %s", exc)
+        logger.error("LLM call (%s) failed: %s", provider, exc)
         return _fallback_response(binary), "fallback"
 
 

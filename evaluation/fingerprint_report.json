@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-17T05:46:15.219535+00:00",
+  "generated_at": "2026-06-23T04:48:59.537326+00:00",
   "our_system": {
     "total_checks": 22,
     "passed": 22,
@@ -9,14 +9,14 @@
         "name": "timing_simple_cmd",
         "passed": true,
         "expected": "< 200ms",
-        "actual": "21.4ms",
-        "notes": "ls returned 0 chars in 21.4ms"
+        "actual": "25.1ms",
+        "notes": "ls returned 0 chars in 25.1ms"
       },
       {
         "name": "timing_complex_cmd",
         "passed": true,
         "expected": "> 10ms (jitter present)",
-        "actual": "93.9ms",
+        "actual": "172.1ms",
         "notes": "Complex commands should have realistic delay"
       },
       {
@@ -24,7 +24,7 @@
         "passed": true,
         "expected": "Timing variance > 0",
         "actual": "5 unique times out of 5 runs",
-        "notes": "Times (ms): [46.91, 31.12, 16.08, 48.55, 30.31]"
+        "notes": "Times (ms): [47.23, 47.04, 16.06, 64.09, 47.91]"
       },
       {
         "name": "cross_ref_passwd_whoami",
@@ -72,7 +72,7 @@
         "name": "uptime_increases",
         "passed": true,
         "expected": "uptime contains 'up' and looks realistic",
-        "actual": "uptime1= 05:46:14 up 21 days,  9:08,  2 user,  load averag",
+        "actual": "uptime1= 04:48:58 up 21 days,  9:08,  2 user,  load averag",
         "notes": ""
       },
       {

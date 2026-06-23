@@ -6,6 +6,7 @@ pydantic-settings>=2.2.0
 # LLM APIs (Module 3)
 anthropic>=0.25.0
 openai>=1.14.0
+google-generativeai>=0.8.0
 
 # HTTP / external APIs (Module 5 — AbuseIPDB)
 httpx>=0.27.0
