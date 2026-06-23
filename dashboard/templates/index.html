@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍯 Adaptive Honeypot — Live Threat Intelligence</title>
+    <meta name="description" content="Real-time threat intelligence dashboard for the Adaptive LLM-Powered Honeypot with Behavioural Mimicry">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <style>
+        /* ============================================================
+           CSS Reset + Global Tokens
+           ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary:    #0a0a0f;
+            --bg-secondary:  #0f1118;
+            --bg-card:       #12141d;
+            --bg-card-hover: #181b27;
+            --border:        #1e2235;
+            --border-glow:   #00ff8830;
+
+            --green:         #00ff88;
+            --green-dim:     #00cc6a;
+            --green-subtle:  #00ff8815;
+            --yellow:        #ffcc00;
+            --orange:        #ff8c00;
+            --red:           #ff3355;
+            --red-dim:       #cc2244;
+            --blue:          #4488ff;
+            --purple:        #aa66ff;
+            --cyan:          #00ccff;
+
+            --text-primary:  #e8e8f0;
+            --text-secondary:#8888aa;
+            --text-dim:      #555570;
+
+            --font-mono:     'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+            --radius:        8px;
+            --radius-sm:     4px;
+            --transition:    0.2s ease;
+        }
+
+        body {
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 136, 0.015) 2px,
+                rgba(0, 255, 136, 0.015) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ============================================================
+           Header
+           ============================================================ */
+        .header {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            font-size: 24px;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 4px var(--green)); }
+            50%      { filter: drop-shadow(0 0 12px var(--green)); }
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pill.online {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.3; }
+        }
+
+        .header-stat {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-stat .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--green);
+            display: block;
+        }
+
+        /* ============================================================
+           Grid Layout — 2x2 panels
+           ============================================================ */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1px;
+            height: calc(100vh - 72px);
+            background: var(--border);
+        }
+
+        .panel {
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            background: var(--bg-secondary);
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .panel-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        /* Scrollbar styling */
+        .panel-content::-webkit-scrollbar { width: 4px; }
+        .panel-content::-webkit-scrollbar-track { background: transparent; }
+        .panel-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .panel-content::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+        /* ============================================================
+           Panel 1 — Active Sessions
+           ============================================================ */
+        .session-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .session-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--green-dim);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.05);
+        }
+
+        .session-card.selected {
+            border-color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.15),
+                        inset 0 0 20px rgba(0, 255, 136, 0.03);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .session-id {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--cyan);
+        }
+
+        .threat-badge {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .threat-badge.low      { background: rgba(0, 255, 136, 0.15); color: var(--green); }
+        .threat-badge.medium   { background: rgba(255, 204, 0, 0.15); color: var(--yellow); }
+        .threat-badge.high     { background: rgba(255, 140, 0, 0.15); color: var(--orange); }
+        .threat-badge.critical { background: rgba(255, 51, 85, 0.15); color: var(--red); }
+
+        .session-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .session-meta .label {
+            color: var(--text-dim);
+        }
+
+        .session-meta .value {
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        .score-bar {
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s ease, background 0.5s ease;
+        }
+
+        .score-bar-fill.low      { background: var(--green); }
+        .score-bar-fill.medium   { background: var(--yellow); }
+        .score-bar-fill.high     { background: var(--orange); }
+        .score-bar-fill.critical { background: var(--red); }
+
+        .persona-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            margin-top: 6px;
+        }
+
+        .persona-tag.generic_linux    { background: rgba(0, 204, 255, 0.12); color: var(--cyan); }
+        .persona-tag.dev_workstation  { background: rgba(170, 102, 255, 0.12); color: var(--purple); }
+        .persona-tag.finance_server   { background: rgba(255, 51, 85, 0.12); color: var(--red); }
+
+        .no-sessions {
+            text-align: center;
+            color: var(--text-dim);
+            padding: 40px 20px;
+            font-size: 13px;
+        }
+
+        .no-sessions .icon { font-size: 32px; margin-bottom: 12px; display: block; }
+
+        /* ============================================================
+           Panel 2 — Threat Score Timeline (Chart)
+           ============================================================ */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 8px;
+        }
+
+        .chart-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-dim);
+            font-size: 13px;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chart-placeholder .icon { font-size: 28px; }
+
+        /* ============================================================
+           Panel 3 — Live Command Feed
+           ============================================================ */
+        .cmd-entry {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            margin-bottom: 2px;
+            transition: background var(--transition);
+        }
+
+        .cmd-entry:hover {
+            background: var(--bg-card);
+        }
+
+        .cmd-level-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .cmd-level-dot.benign         { background: var(--green); }
+        .cmd-level-dot.reconnaissance { background: var(--green-dim); }
+        .cmd-level-dot.exploration    { background: var(--yellow); }
+        .cmd-level-dot.privilege_escalation { background: var(--orange); }
+        .cmd-level-dot.exfiltration   { background: var(--red); }
+        .cmd-level-dot.lateral_movement { background: var(--purple); }
+
+        .cmd-session {
+            color: var(--text-dim);
+            min-width: 65px;
+            flex-shrink: 0;
+        }
+
+        .cmd-text {
+            color: var(--text-primary);
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .cmd-score {
+            font-weight: 600;
+            min-width: 35px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .cmd-score.positive { color: var(--red); }
+        .cmd-score.zero     { color: var(--text-dim); }
+
+        .cmd-category {
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 55px;
+            text-align: center;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .cmd-category.benign         { background: rgba(0, 255, 136, 0.1); color: var(--green); }
+        .cmd-category.reconnaissance { background: rgba(0, 204, 106, 0.1); color: var(--green-dim); }
+        .cmd-category.exploration    { background: rgba(255, 204, 0, 0.1); color: var(--yellow); }
+        .cmd-category.privilege_escalation { background: rgba(255, 140, 0, 0.1); color: var(--orange); }
+        .cmd-category.exfiltration   { background: rgba(255, 51, 85, 0.1); color: var(--red); }
+        .cmd-category.lateral_movement { background: rgba(170, 102, 255, 0.1); color: var(--purple); }
+
+        /* Persona switch separator */
+        .persona-switch-entry {
+            background: linear-gradient(90deg, rgba(255, 140, 0, 0.08), transparent);
+            border-left: 3px solid var(--orange);
+            padding: 8px 12px;
+            margin: 6px 0;
+            font-size: 11px;
+            border-radius: var(--radius-sm);
+            animation: flash-switch 0.6s ease;
+        }
+
+        @keyframes flash-switch {
+            0%   { background: rgba(255, 140, 0, 0.2); }
+            100% { background: linear-gradient(90deg, rgba(255, 140, 0, 0.08), transparent); }
+        }
+
+        .persona-switch-entry .switch-label {
+            color: var(--orange);
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .persona-switch-entry .switch-detail {
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+           Panel 4 — System Statistics
+           ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .stat-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+        .stat-card.yellow::before { background: linear-gradient(90deg, var(--yellow), transparent); }
+        .stat-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+        .stat-card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+        .stat-card.cyan::before   { background: linear-gradient(90deg, var(--cyan), transparent); }
+        .stat-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .stat-value.green  { color: var(--green); }
+        .stat-value.yellow { color: var(--yellow); }
+        .stat-value.blue   { color: var(--blue); }
+        .stat-value.purple { color: var(--purple); }
+        .stat-value.cyan   { color: var(--cyan); }
+        .stat-value.red    { color: var(--red); }
+
+        .stat-compare {
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        .stat-compare .vs {
+            color: var(--text-secondary);
+        }
+
+        .stat-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ============================================================
+           Animations
+           ============================================================ */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in { animation: fade-in 0.3s ease; }
+
+        /* ============================================================
+           Responsive
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+            .panel-content { max-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================================
+         HEADER
+         ============================================================ -->
+    <header class="header" id="dashboard-header">
+        <div class="header-left">
+            <span class="header-logo">🍯</span>
+            <div>
+                <div class="header-title">Adaptive Honeypot — Live Threat Intelligence</div>
+                <div class="header-subtitle" id="header-subtitle">web-srv-03 | Connecting...</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="header-stat">
+                <span class="value" id="stat-active">0</span>
+                active
+            </div>
+            <div class="header-stat">
+                <span class="value" id="stat-total">0</span>
+                today
+            </div>
+            <div class="status-pill online" id="ws-status">
+                <span class="status-dot"></span>
+                <span id="ws-status-text">CONNECTING</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+         DASHBOARD GRID
+         ============================================================ -->
+    <main class="dashboard-grid">
+
+        <!-- Panel 1 — Active Sessions -->
+        <section class="panel" id="panel-sessions">
+            <div class="panel-header">
+                <span class="panel-title">📡 Active Sessions</span>
+                <span class="panel-badge" id="session-count-badge" style="background:rgba(0,255,136,0.1);color:var(--green);">0</span>
+            </div>
+            <div class="panel-content" id="sessions-list">
+                <div class="no-sessions">
+                    <span class="icon">📡</span>
+                    Waiting for sessions...<br>
+                    <span style="font-size:11px;color:var(--text-dim);">Run demo_session.py to start</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 2 — Threat Score Timeline -->
+        <section class="panel" id="panel-timeline">
+            <div class="panel-header">
+                <span class="panel-title">📈 Threat Score Timeline</span>
+                <span class="panel-badge" id="timeline-session-label" style="background:rgba(0,204,255,0.1);color:var(--cyan);">No session selected</span>
+            </div>
+            <div class="panel-content">
+                <div class="chart-container" id="chart-container">
+                    <canvas id="threat-chart"></canvas>
+                    <div class="chart-placeholder" id="chart-placeholder">
+                        <span class="icon">📊</span>
+                        Click a session to view the threat score timeline
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 3 — Live Command Feed -->
+        <section class="panel" id="panel-feed">
+            <div class="panel-header">
+                <span class="panel-title">⌨️ Live Command Feed</span>
+                <span class="panel-badge" id="feed-count" style="background:rgba(255,204,0,0.1);color:var(--yellow);">0</span>
+            </div>
+            <div class="panel-content" id="command-feed">
+                <div class="no-sessions">
+                    <span class="icon">⌨️</span>
+                    Waiting for commands...
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 4 — System Statistics -->
+        <section class="panel" id="panel-stats">
+            <div class="panel-header">
+                <span class="panel-title">📊 System Statistics</span>
+                <span class="panel-badge" style="background:rgba(68,136,255,0.1);color:var(--blue);">LIVE</span>
+            </div>
+            <div class="panel-content" id="stats-container">
+                <div class="stats-grid">
+                    <div class="stat-card green">
+                        <div class="stat-label">Session Engagement</div>
+                        <div class="stat-value green" id="stat-avg-duration">--</div>
+                        <div class="stat-compare">Cowrie avg: <span class="vs" id="stat-cowrie-duration">~44s</span> <span style="font-size:9px">(Vetterl 2020)</span></div>
+                    </div>
+                    <div class="stat-card yellow">
+                        <div class="stat-label">Level 3+ Reached</div>
+                        <div class="stat-value yellow" id="stat-level3">--%</div>
+                        <div class="stat-compare">Cowrie avg: <span class="vs">~12%</span> <span style="font-size:9px">(Nawrocki 2019)</span></div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-label">Fingerprint Resistance</div>
+                        <div class="stat-value blue" id="stat-fingerprint">--/22</div>
+                        <div class="stat-compare">Cowrie: <span class="vs">8/22</span> <span style="font-size:9px">(our test suite)</span></div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-label">Persona Switches</div>
+                        <div class="stat-value purple" id="stat-switches">0</div>
+                        <div class="stat-compare">today</div>
+                    </div>
+                    <div class="stat-card cyan">
+                        <div class="stat-label">Unique IPs</div>
+                        <div class="stat-value cyan" id="stat-ips">0</div>
+                        <div class="stat-compare">today</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-label">Total Sessions</div>
+                        <div class="stat-value red" id="stat-sessions-total">0</div>
+                        <div class="stat-compare">today</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Methodology footer -->
+    <footer style="padding: 12px 24px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-dim); line-height: 1.6;">
+        <strong style="color: var(--text-secondary);">Methodology:</strong>
+        Fingerprint scores measured by 22 automated checks (timing, cross-reference consistency, write persistence, Cowrie-signature detection) run against our dispatcher.
+        Cowrie baseline: checks adapted from Vetterl &amp; Clayton (2018) honeypot detection techniques, scored against documented Cowrie behaviour.
+        Session engagement is simulated (scripted command sequences); real-attacker deployment is Phase-3 future work.
+    </footer>
+
+    <!-- ============================================================
+         JAVASCRIPT
+         ============================================================ -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ====== State ======
+        let selectedSessionId = null;
+        let threatChart = null;
+        let lastCommandCount = 0;
+        let ws = null;
+        let wsReconnectInterval = null;
+
+        // ====== DOM refs ======
+        const sessionsList    = document.getElementById('sessions-list');
+        const commandFeed     = document.getElementById('command-feed');
+        const chartCanvas     = document.getElementById('threat-chart');
+        const chartPlaceholder= document.getElementById('chart-placeholder');
+        const wsStatusText    = document.getElementById('ws-status-text');
+        const wsStatusPill    = document.getElementById('ws-status');
+
+        // ====== WebSocket Connection ======
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                wsStatusText.textContent = 'LIVE';
+                wsStatusPill.className = 'status-pill online';
+                if (wsReconnectInterval) {
+                    clearInterval(wsReconnectInterval);
+                    wsReconnectInterval = null;
+                }
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'update') {
+                        updateDashboard(data);
+                    }
+                } catch (e) {
+                    console.error('WS parse error:', e);
+                }
+            };
+
+            ws.onclose = () => {
+                wsStatusText.textContent = 'OFFLINE';
+                wsStatusPill.className = 'status-pill online';
+                wsStatusPill.style.borderColor = 'rgba(255,51,85,0.3)';
+                wsStatusPill.style.background = 'rgba(255,51,85,0.1)';
+                wsStatusPill.style.color = 'var(--red)';
+                document.querySelector('.status-dot').style.background = 'var(--red)';
+
+                // Reconnect
+                if (!wsReconnectInterval) {
+                    wsReconnectInterval = setInterval(() => {
+                        connectWebSocket();
+                    }, 3000);
+                }
+            };
+
+            ws.onerror = () => {};
+        }
+
+        // ====== Dashboard Update ======
+        function updateDashboard(data) {
+            updateSessions(data.sessions || []);
+            updateCommandFeed(data.commands || []);
+            updateStats(data.stats || {});
+            updateHeader(data);
+        }
+
+        // ====== Panel 1: Sessions ======
+        function updateSessions(sessions) {
+            document.getElementById('session-count-badge').textContent = sessions.length;
+            document.getElementById('stat-active').textContent = sessions.length;
+
+            if (sessions.length === 0) {
+                sessionsList.innerHTML = `
+                    <div class="no-sessions">
+                        <span class="icon">📡</span>
+                        Waiting for sessions...<br>
+                        <span style="font-size:11px;color:var(--text-dim);">Run demo_session.py to start</span>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            sessions.forEach(s => {
+                const isSelected = s.session_id === selectedSessionId;
+                const level = s.threat_level || 'low';
+                const persona = s.persona || 'generic_linux';
+                const dur = formatDuration(s.duration_seconds || 0);
+                const ip = maskIP(s.attacker_ip || '0.0.0.0');
+                const score = s.threat_score || 0;
+
+                html += `
+                <div class="session-card ${isSelected ? 'selected' : ''} fade-in"
+                     onclick="selectSession('${s.session_id}')"
+                     id="session-${s.session_id}">
+                    <div class="session-header">
+                        <span class="session-id">#${s.session_id.slice(0, 8)}</span>
+                        <span class="threat-badge ${level}">${level.toUpperCase()} ${levelIcon(level)}</span>
+                    </div>
+                    <div class="session-meta">
+                        <span class="label">IP</span>
+                        <span class="value">${ip}</span>
+                        <span class="label">Score</span>
+                        <span class="value">${score}/100</span>
+                        <span class="label">Commands</span>
+                        <span class="value">${s.command_count || 0}</span>
+                        <span class="label">Duration</span>
+                        <span class="value">${dur}</span>
+                    </div>
+                    <div class="score-bar">
+                        <div class="score-bar-fill ${level}" style="width: ${score}%"></div>
+                    </div>
+                    <span class="persona-tag ${persona}">${formatPersona(persona)}</span>
+                </div>`;
+            });
+
+            sessionsList.innerHTML = html;
+
+            // Auto-select first session if none selected
+            if (!selectedSessionId && sessions.length > 0) {
+                selectSession(sessions[0].session_id);
+            }
+
+            // Update timeline for selected session
+            if (selectedSessionId) {
+                const selected = sessions.find(s => s.session_id === selectedSessionId);
+                if (selected && selected.score_history) {
+                    updateChart(selected.score_history, selectedSessionId);
+                }
+            }
+        }
+
+        // ====== Panel 2: Chart ======
+        function updateChart(scoreHistory, sessionId) {
+            if (!scoreHistory || scoreHistory.length === 0) {
+                chartPlaceholder.style.display = 'flex';
+                if (threatChart) { threatChart.destroy(); threatChart = null; }
+                return;
+            }
+
+            chartPlaceholder.style.display = 'none';
+
+            const labels = scoreHistory.map((p, i) => p.command || `Cmd ${i+1}`);
+            const scores = scoreHistory.map(p => p.score);
+            const personas = scoreHistory.map(p => p.persona);
+
+            // Detect persona switch points for vertical lines
+            const switchPoints = [];
+            for (let i = 1; i < personas.length; i++) {
+                if (personas[i] !== personas[i-1]) {
+                    switchPoints.push({ index: i, to: personas[i] });
+                }
+            }
+
+            const bgColors = scores.map(s => {
+                if (s <= 20) return 'rgba(0, 255, 136, 0.2)';
+                if (s <= 50) return 'rgba(255, 204, 0, 0.2)';
+                if (s <= 80) return 'rgba(255, 140, 0, 0.2)';
+                return 'rgba(255, 51, 85, 0.2)';
+            });
+
+            const borderColors = scores.map(s => {
+                if (s <= 20) return '#00ff88';
+                if (s <= 50) return '#ffcc00';
+                if (s <= 80) return '#ff8c00';
+                return '#ff3355';
+            });
+
+            if (threatChart) {
+                threatChart.data.labels = labels;
+                threatChart.data.datasets[0].data = scores;
+                threatChart.data.datasets[0].backgroundColor = bgColors;
+                threatChart.data.datasets[0].borderColor = borderColors;
+
+                // Update annotations for switch points
+                const annotations = {};
+                switchPoints.forEach((sp, idx) => {
+                    annotations[`switch-${idx}`] = {
+                        type: 'line',
+                        xMin: sp.index,
+                        xMax: sp.index,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                            display: true,
+                            content: `→ ${formatPersona(sp.to)}`,
+                            position: 'start',
+                            backgroundColor: 'rgba(255, 140, 0, 0.8)',
+                            font: { family: 'JetBrains Mono', size: 10 },
+                            color: '#fff'
+                        }
+                    };
+                });
+
+                if (threatChart.options.plugins.annotation) {
+                    threatChart.options.plugins.annotation.annotations = annotations;
+                }
+
+                threatChart.update('none');
+                return;
+            }
+
+            // Create new chart
+            const annotations = {};
+            switchPoints.forEach((sp, idx) => {
+                annotations[`switch-${idx}`] = {
+                    type: 'line',
+                    xMin: sp.index,
+                    xMax: sp.index,
+                    borderColor: '#ff8c00',
+                    borderWidth: 2,
+                    borderDash: [5, 5]
+                };
+            });
+
+            threatChart = new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Threat Score',
+                        data: scores,
+                        fill: true,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: borderColors,
+                        pointBorderColor: '#0a0a0f',
+                        pointBorderWidth: 2,
+                        tension: 0.3,
+                        segment: {
+                            borderColor: ctx => {
+                                const s = ctx.p1.parsed.y;
+                                if (s <= 20) return '#00ff88';
+                                if (s <= 50) return '#ffcc00';
+                                if (s <= 80) return '#ff8c00';
+                                return '#ff3355';
+                            }
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 300 },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(30, 34, 53, 0.8)' },
+                            ticks: {
+                                color: '#555570',
+                                font: { family: 'JetBrains Mono', size: 10 },
+                                stepSize: 20,
+                                callback: v => v
+                            }
+                        },
+                        x: {
+                            grid: { color: 'rgba(30, 34, 53, 0.5)' },
+                            ticks: {
+                                color: '#555570',
+                                font: { family: 'JetBrains Mono', size: 9 },
+                                maxRotation: 45,
+                                autoSkip: true,
+                                maxTicksLimit: 15
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#12141d',
+                            borderColor: '#1e2235',
+                            borderWidth: 1,
+                            titleColor: '#e8e8f0',
+                            bodyColor: '#8888aa',
+                            titleFont: { family: 'JetBrains Mono', size: 12 },
+                            bodyFont: { family: 'JetBrains Mono', size: 11 },
+                            callbacks: {
+                                title: items => items[0]?.label || '',
+                                label: item => `Score: ${item.parsed.y}/100`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ====== Panel 3: Command Feed ======
+        function updateCommandFeed(commands) {
+            if (commands.length === 0) {
+                commandFeed.innerHTML = `
+                    <div class="no-sessions">
+                        <span class="icon">⌨️</span>
+                        Waiting for commands...
+                    </div>`;
+                return;
+            }
+
+            document.getElementById('feed-count').textContent = commands.length;
+
+            // Only rebuild if new commands arrived
+            if (commands.length === lastCommandCount) return;
+            lastCommandCount = commands.length;
+
+            let html = '';
+            commands.forEach(cmd => {
+                if (cmd.type === 'persona_switch') {
+                    html += `
+                    <div class="persona-switch-entry fade-in">
+                        <div class="switch-label">⚡ PERSONA SWITCH</div>
+                        <div class="switch-detail">
+                            [${cmd.session_id}] ${formatPersona(cmd.from_persona)} → ${formatPersona(cmd.to_persona)}
+                            (score: ${cmd.trigger_score})
+                        </div>
+                    </div>`;
+                } else {
+                    const cat = cmd.category || 'benign';
+                    const delta = cmd.score_delta || 0;
+                    html += `
+                    <div class="cmd-entry">
+                        <span class="cmd-level-dot ${cat}"></span>
+                        <span class="cmd-session">[${cmd.session_id}]</span>
+                        <span class="cmd-text">${escapeHtml(cmd.command || '')}</span>
+                        <span class="cmd-score ${delta > 0 ? 'positive' : 'zero'}">
+                            ${delta > 0 ? '+' + delta : delta}
+                        </span>
+                        <span class="cmd-category ${cat}">${formatCategory(cat)}</span>
+                    </div>`;
+                }
+            });
+
+            commandFeed.innerHTML = html;
+            commandFeed.scrollTop = commandFeed.scrollHeight;
+        }
+
+        // ====== Panel 4: Stats ======
+        function updateStats(stats) {
+            document.getElementById('stat-avg-duration').textContent = stats.avg_duration_display || '--';
+            document.getElementById('stat-level3').textContent = (stats.level3_plus_pct || 0) + '%';
+            document.getElementById('stat-fingerprint').textContent =
+                (stats.fingerprint_score || 0) + '/' + (stats.fingerprint_total || 22);
+            document.getElementById('stat-switches').textContent = stats.persona_switches_today || 0;
+            document.getElementById('stat-ips').textContent = stats.unique_ips_today || 0;
+            document.getElementById('stat-sessions-total').textContent = stats.total_sessions_today || 0;
+            document.getElementById('stat-total').textContent = stats.total_sessions_today || 0;
+        }
+
+        // ====== Header ======
+        function updateHeader(data) {
+            const sessions = data.sessions || [];
+            const stats = data.stats || {};
+            const subtitle = `web-srv-03 | ${sessions.length} active session${sessions.length !== 1 ? 's' : ''} | ${stats.total_sessions_today || 0} total today`;
+            document.getElementById('header-subtitle').textContent = subtitle;
+        }
+
+        // ====== Helpers ======
+        window.selectSession = function(sessionId) {
+            selectedSessionId = sessionId;
+            document.getElementById('timeline-session-label').textContent = '#' + sessionId.slice(0, 8);
+
+            // Highlight
+            document.querySelectorAll('.session-card').forEach(el => {
+                el.classList.toggle('selected', el.id === `session-${sessionId}`);
+            });
+
+            // Fetch timeline via REST as fallback
+            fetch(`/api/sessions/${sessionId}/timeline`)
+                .then(r => r.json())
+                .then(timeline => updateChart(timeline, sessionId))
+                .catch(() => {});
+        };
+
+        function formatDuration(seconds) {
+            if (!seconds || seconds < 0) return '0m 00s';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}m ${s.toString().padStart(2, '0')}s`;
+        }
+
+        function maskIP(ip) {
+            if (!ip || ip === '0.0.0.0') return '0.0.0.0';
+            const parts = ip.split('.');
+            if (parts.length === 4) {
+                return `${parts[0]}.${parts[1]}.x.x`;
+            }
+            return ip;
+        }
+
+        function levelIcon(level) {
+            switch (level) {
+                case 'low':      return '🟢';
+                case 'medium':   return '🟡';
+                case 'high':     return '🟠';
+                case 'critical': return '🔴';
+                default:         return '⚪';
+            }
+        }
+
+        function formatPersona(p) {
+            if (!p) return 'unknown';
+            return p.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function formatCategory(cat) {
+            if (!cat) return '';
+            const map = {
+                'benign': 'BENIGN',
+                'reconnaissance': 'RECON',
+                'exploration': 'EXPLORE',
+                'privilege_escalation': 'PRIV ESC',
+                'exfiltration': 'EXFIL',
+                'lateral_movement': 'LATERAL'
+            };
+            return map[cat] || cat.toUpperCase();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ====== Initialize ======
+        connectWebSocket();
+
+    })();
+    </script>
+</body>
+</html>

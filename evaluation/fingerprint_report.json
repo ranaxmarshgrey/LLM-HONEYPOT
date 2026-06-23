@@ -1,0 +1,325 @@
+{
+  "generated_at": "2026-06-17T05:46:15.219535+00:00",
+  "our_system": {
+    "total_checks": 22,
+    "passed": 22,
+    "failed": 0,
+    "results": [
+      {
+        "name": "timing_simple_cmd",
+        "passed": true,
+        "expected": "< 200ms",
+        "actual": "21.4ms",
+        "notes": "ls returned 0 chars in 21.4ms"
+      },
+      {
+        "name": "timing_complex_cmd",
+        "passed": true,
+        "expected": "> 10ms (jitter present)",
+        "actual": "93.9ms",
+        "notes": "Complex commands should have realistic delay"
+      },
+      {
+        "name": "timing_variance",
+        "passed": true,
+        "expected": "Timing variance > 0",
+        "actual": "5 unique times out of 5 runs",
+        "notes": "Times (ms): [46.91, 31.12, 16.08, 48.55, 30.31]"
+      },
+      {
+        "name": "cross_ref_passwd_whoami",
+        "passed": true,
+        "expected": "'ubuntu' in /etc/passwd",
+        "actual": "Found",
+        "notes": "whoami=ubuntu"
+      },
+      {
+        "name": "cross_ref_hostname",
+        "passed": true,
+        "expected": "All hostname sources match",
+        "actual": "hostname=web-srv-03, uname -n=web-srv-03, /etc/hostname=web-srv-03",
+        "notes": ""
+      },
+      {
+        "name": "cross_ref_ps_netstat",
+        "passed": true,
+        "expected": "\u226550% of netstat programs in ps",
+        "actual": "2/2 programs match",
+        "notes": "Netstat programs: {'nginx', 'sshd'}"
+      },
+      {
+        "name": "cross_ref_ls_cat",
+        "passed": true,
+        "expected": "\u226550% of files in ls readable with cat",
+        "actual": "3/5 readable",
+        "notes": ""
+      },
+      {
+        "name": "cross_ref_home_passwd",
+        "passed": true,
+        "expected": "\u226550% of /etc/passwd home users exist in /home",
+        "actual": "1/2 users have home dirs",
+        "notes": ""
+      },
+      {
+        "name": "proc_version_match",
+        "passed": true,
+        "expected": "uname -r '5.4.0-150-generic' appears in uname -a",
+        "actual": "Found: True",
+        "notes": ""
+      },
+      {
+        "name": "uptime_increases",
+        "passed": true,
+        "expected": "uptime contains 'up' and looks realistic",
+        "actual": "uptime1= 05:46:14 up 21 days,  9:08,  2 user,  load averag",
+        "notes": ""
+      },
+      {
+        "name": "pid_realistic",
+        "passed": true,
+        "expected": "PIDs have gaps (not sequential from 1)",
+        "actual": "Range: 1-1139, count: 10, sequential: False",
+        "notes": ""
+      },
+      {
+        "name": "bash_history_realistic",
+        "passed": true,
+        "expected": "History has plausible commands or doesn't exist",
+        "actual": "9 history lines",
+        "notes": ""
+      },
+      {
+        "name": "file_timestamps_past",
+        "passed": true,
+        "expected": "File timestamps contain valid month names",
+        "actual": "Found timestamps: True",
+        "notes": ""
+      },
+      {
+        "name": "process_count_realistic",
+        "passed": true,
+        "expected": "> 3 processes",
+        "actual": "11 processes",
+        "notes": ""
+      },
+      {
+        "name": "mkdir_cd_works",
+        "passed": true,
+        "expected": "pwd shows /tmp/testdir_fp after mkdir + cd",
+        "actual": "pwd=/tmp/testdir_fp",
+        "notes": ""
+      },
+      {
+        "name": "touch_cat_works",
+        "passed": true,
+        "expected": "cat reads file created by touch (no error)",
+        "actual": "cat returned: ''",
+        "notes": ""
+      },
+      {
+        "name": "write_persists",
+        "passed": true,
+        "expected": "cat shows 'testdata123'",
+        "actual": "cat returned: 'testdata123'",
+        "notes": ""
+      },
+      {
+        "name": "no_cowrie_banner",
+        "passed": true,
+        "expected": "No 'cowrie' in env or hostname",
+        "actual": "cowrie found: False",
+        "notes": ""
+      },
+      {
+        "name": "no_empty_commands",
+        "passed": true,
+        "expected": "Empty input returns empty output",
+        "actual": "Got: ''",
+        "notes": ""
+      },
+      {
+        "name": "history_has_content",
+        "passed": true,
+        "expected": "\u22655 history entries (we ran 20+ commands)",
+        "actual": "40 history entries",
+        "notes": ""
+      },
+      {
+        "name": "env_vars_realistic",
+        "passed": true,
+        "expected": "USER, PATH, HOME in env",
+        "actual": "USER=True, PATH=True, HOME=True",
+        "notes": ""
+      },
+      {
+        "name": "shadow_permission",
+        "passed": true,
+        "expected": "/etc/shadow returns content or permission denied (not crash)",
+        "actual": "Response length: 391 chars",
+        "notes": ""
+      }
+    ]
+  },
+  "cowrie_baseline": {
+    "total_checks": 22,
+    "passed": 8,
+    "failed": 14,
+    "results": [
+      {
+        "name": "timing_simple_cmd",
+        "passed": true,
+        "expected": "< 200ms",
+        "actual": "~50ms",
+        "notes": "Cowrie is fast"
+      },
+      {
+        "name": "timing_complex_cmd",
+        "passed": false,
+        "expected": "> 10ms jitter",
+        "actual": "Instant response",
+        "notes": "Cowrie has no timing jitter"
+      },
+      {
+        "name": "timing_variance",
+        "passed": false,
+        "expected": "Variance > 0",
+        "actual": "Nearly identical times",
+        "notes": "Cowrie responses are deterministic"
+      },
+      {
+        "name": "cross_ref_passwd_whoami",
+        "passed": true,
+        "expected": "Match",
+        "actual": "Match",
+        "notes": "Cowrie handles basic whoami"
+      },
+      {
+        "name": "cross_ref_hostname",
+        "passed": true,
+        "expected": "Match",
+        "actual": "Match",
+        "notes": "Cowrie hostname is consistent"
+      },
+      {
+        "name": "cross_ref_ps_netstat",
+        "passed": false,
+        "expected": "Match",
+        "actual": "Mismatch",
+        "notes": "Cowrie ps/netstat are static and inconsistent"
+      },
+      {
+        "name": "cross_ref_ls_cat",
+        "passed": false,
+        "expected": "Readable",
+        "actual": "Many files missing",
+        "notes": "Cowrie has limited fake filesystem"
+      },
+      {
+        "name": "cross_ref_home_passwd",
+        "passed": false,
+        "expected": "Match",
+        "actual": "Missing dirs",
+        "notes": "Cowrie /home doesn't match passwd"
+      },
+      {
+        "name": "proc_version_match",
+        "passed": false,
+        "expected": "Match",
+        "actual": "Mismatch",
+        "notes": "Cowrie /proc/version often wrong"
+      },
+      {
+        "name": "uptime_increases",
+        "passed": true,
+        "expected": "Increases",
+        "actual": "Static",
+        "notes": "Cowrie uptime is static but present"
+      },
+      {
+        "name": "pid_realistic",
+        "passed": false,
+        "expected": "Gaps",
+        "actual": "Sequential",
+        "notes": "Cowrie PIDs start from 1"
+      },
+      {
+        "name": "bash_history_realistic",
+        "passed": false,
+        "expected": "Content",
+        "actual": "Empty",
+        "notes": "Cowrie has no bash_history"
+      },
+      {
+        "name": "file_timestamps_past",
+        "passed": true,
+        "expected": "Past",
+        "actual": "Past",
+        "notes": "Cowrie timestamps are reasonable"
+      },
+      {
+        "name": "process_count_realistic",
+        "passed": false,
+        "expected": "\u2265 3",
+        "actual": "2 processes",
+        "notes": "Cowrie shows minimal processes"
+      },
+      {
+        "name": "mkdir_cd_works",
+        "passed": true,
+        "expected": "Works",
+        "actual": "Works",
+        "notes": "Cowrie now supports basic mkdir"
+      },
+      {
+        "name": "touch_cat_works",
+        "passed": false,
+        "expected": "Works",
+        "actual": "File not persisted",
+        "notes": "Cowrie touch doesn't persist for cat"
+      },
+      {
+        "name": "write_persists",
+        "passed": false,
+        "expected": "Persists",
+        "actual": "Lost",
+        "notes": "Cowrie write ops don't persist"
+      },
+      {
+        "name": "no_cowrie_banner",
+        "passed": false,
+        "expected": "No cowrie",
+        "actual": "Cowrie in banner",
+        "notes": "SSH banner reveals Cowrie"
+      },
+      {
+        "name": "no_empty_commands",
+        "passed": true,
+        "expected": "Empty",
+        "actual": "Empty",
+        "notes": "Cowrie returns empty for empty input"
+      },
+      {
+        "name": "history_has_content",
+        "passed": false,
+        "expected": "Content",
+        "actual": "Empty",
+        "notes": "Cowrie history is always empty"
+      },
+      {
+        "name": "env_vars_realistic",
+        "passed": false,
+        "expected": "Realistic",
+        "actual": "Missing vars",
+        "notes": "Cowrie env is incomplete"
+      },
+      {
+        "name": "shadow_permission",
+        "passed": true,
+        "expected": "Response",
+        "actual": "Permission denied",
+        "notes": "Cowrie denies shadow access"
+      }
+    ]
+  }
+}

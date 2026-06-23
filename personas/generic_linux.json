@@ -1,0 +1,581 @@
+{
+  "persona_id": "generic_linux",
+  "display_name": "Generic Linux Web Server",
+  "threat_trigger_level": "default",
+  "schema_version": 1,
+  "system": {
+    "hostname": "web-srv-03",
+    "os": "Ubuntu 20.04.6 LTS",
+    "kernel": "5.4.0-150-generic",
+    "arch": "x86_64",
+    "uptime_seconds": 1847293,
+    "boot_time": "2026-03-25T21:12:47Z",
+    "timezone": "UTC",
+    "locale": "en_US.UTF-8"
+  },
+  "network": {
+    "interfaces": [
+      {
+        "name": "eth0",
+        "ip": "10.0.2.15",
+        "mac": "08:00:27:4a:3b:2c",
+        "netmask": "255.255.255.0",
+        "broadcast": "10.0.2.255",
+        "state": "UP",
+        "rx_bytes": 842917,
+        "tx_bytes": 1284736
+      },
+      {
+        "name": "lo",
+        "ip": "127.0.0.1",
+        "mac": "00:00:00:00:00:00",
+        "netmask": "255.0.0.0",
+        "broadcast": null,
+        "state": "UP",
+        "rx_bytes": 15234,
+        "tx_bytes": 15234
+      }
+    ],
+    "open_ports": [
+      22,
+      80,
+      443
+    ],
+    "active_connections": [
+      {
+        "proto": "tcp",
+        "local_addr": "0.0.0.0:22",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 892,
+        "program": "sshd"
+      },
+      {
+        "proto": "tcp6",
+        "local_addr": ":::22",
+        "foreign_addr": ":::*",
+        "state": "LISTEN",
+        "pid": 892,
+        "program": "sshd"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "0.0.0.0:80",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 1134,
+        "program": "nginx"
+      },
+      {
+        "proto": "tcp",
+        "local_addr": "0.0.0.0:443",
+        "foreign_addr": "0.0.0.0:*",
+        "state": "LISTEN",
+        "pid": 1134,
+        "program": "nginx"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "root",
+      "uid": 0,
+      "gid": 0,
+      "home": "/root",
+      "shell": "/bin/bash",
+      "groups": [
+        "root"
+      ],
+      "password_hash": "!",
+      "last_login": "2026-04-10T09:14:22Z",
+      "last_login_from": "192.168.1.100"
+    },
+    {
+      "username": "ubuntu",
+      "uid": 1000,
+      "gid": 1000,
+      "home": "/home/ubuntu",
+      "shell": "/bin/bash",
+      "groups": [
+        "ubuntu",
+        "sudo",
+        "adm"
+      ],
+      "password_hash": "$6$Qn7aBc9dE$3xK8vJ2mWqP5rL4nT6yU8iO0pA1sD2fG3hJ4kL5zX",
+      "last_login": "2026-04-14T17:43:09Z",
+      "last_login_from": "192.168.1.100"
+    },
+    {
+      "username": "www-data",
+      "uid": 33,
+      "gid": 33,
+      "home": "/var/www",
+      "shell": "/usr/sbin/nologin",
+      "groups": [
+        "www-data"
+      ],
+      "password_hash": "*",
+      "last_login": null,
+      "last_login_from": null
+    }
+  ],
+  "processes": [
+    {
+      "pid": 1,
+      "ppid": 0,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.1,
+      "vsz": 168936,
+      "rss": 13288,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Mar25",
+      "time": "0:03",
+      "command": "/sbin/init"
+    },
+    {
+      "pid": 412,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.4,
+      "vsz": 104168,
+      "rss": 8432,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Mar25",
+      "time": "0:02",
+      "command": "/lib/systemd/systemd-journald"
+    },
+    {
+      "pid": 892,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.1,
+      "vsz": 72296,
+      "rss": 6420,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Mar25",
+      "time": "0:00",
+      "command": "sshd: /usr/sbin/sshd -D"
+    },
+    {
+      "pid": 923,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.0,
+      "vsz": 25552,
+      "rss": 1812,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Mar25",
+      "time": "0:00",
+      "command": "/usr/sbin/cron -f"
+    },
+    {
+      "pid": 1134,
+      "ppid": 1,
+      "user": "root",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.3,
+      "vsz": 55380,
+      "rss": 5876,
+      "tty": "?",
+      "stat": "Ss",
+      "start": "Mar25",
+      "time": "0:00",
+      "command": "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+    },
+    {
+      "pid": 1135,
+      "ppid": 1134,
+      "user": "www-data",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.2,
+      "vsz": 55908,
+      "rss": 3956,
+      "tty": "?",
+      "stat": "S",
+      "start": "Mar25",
+      "time": "0:00",
+      "command": "nginx: worker process"
+    },
+    {
+      "pid": 1136,
+      "ppid": 1134,
+      "user": "www-data",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.2,
+      "vsz": 55908,
+      "rss": 3948,
+      "tty": "?",
+      "stat": "S",
+      "start": "Mar25",
+      "time": "0:00",
+      "command": "nginx: worker process"
+    }
+  ],
+  "filesystem": {
+    "/": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-02-10T11:24:33Z",
+      "children": [
+        "bin",
+        "boot",
+        "dev",
+        "etc",
+        "home",
+        "lib",
+        "lib64",
+        "media",
+        "mnt",
+        "opt",
+        "proc",
+        "root",
+        "run",
+        "sbin",
+        "srv",
+        "sys",
+        "tmp",
+        "usr",
+        "var"
+      ]
+    },
+    "/etc": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-02-10T11:24:33Z",
+      "children": [
+        "crontab",
+        "group",
+        "hostname",
+        "hosts",
+        "nginx",
+        "os-release",
+        "passwd",
+        "shadow",
+        "sudoers"
+      ]
+    },
+    "/etc/hostname": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 11,
+      "content": "web-srv-03\n"
+    },
+    "/etc/hosts": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 127,
+      "content": "127.0.0.1\tlocalhost\n127.0.1.1\tweb-srv-03\n\n::1\tlocalhost ip6-localhost ip6-loopback\nff02::1\tip6-allnodes\nff02::2\tip6-allrouters\n"
+    },
+    "/etc/os-release": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 382,
+      "content": "NAME=\"Ubuntu\"\nVERSION=\"20.04.6 LTS (Focal Fossa)\"\nID=ubuntu\nID_LIKE=debian\nPRETTY_NAME=\"Ubuntu 20.04.6 LTS\"\nVERSION_ID=\"20.04\"\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nVERSION_CODENAME=focal\nUBUNTU_CODENAME=focal\n"
+    },
+    "/etc/passwd": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-02-10T11:24:33Z",
+      "size_bytes": 575,
+      "content": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nsync:x:4:65534:sync:/bin:/bin/sync\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsystemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin\nmessagebus:x:102:105::/nonexistent:/usr/sbin/nologin\nsyslog:x:104:110::/home/syslog:/usr/sbin/nologin\nsshd:x:108:65534::/run/sshd:/usr/sbin/nologin\nubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash\n"
+    },
+    "/etc/shadow": {
+      "type": "file",
+      "owner": "root",
+      "group": "shadow",
+      "permissions": "640",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-02-10T11:24:33Z",
+      "size_bytes": 392,
+      "content": "root:!:20070:0:99999:7:::\ndaemon:*:20070:0:99999:7:::\nbin:*:20070:0:99999:7:::\nsys:*:20070:0:99999:7:::\nsync:*:20070:0:99999:7:::\nwww-data:*:20070:0:99999:7:::\nnobody:*:20070:0:99999:7:::\nsystemd-resolve:*:20070:0:99999:7:::\nmessagebus:*:20070:0:99999:7:::\nsyslog:*:20070:0:99999:7:::\nsshd:*:20070:0:99999:7:::\nubuntu:$6$Qn7aBc9dE$3xK8vJ2mWqP5rL4nT6yU8iO0pA1sD2fG3hJ4kL5zX:20070:0:99999:7:::\n"
+    },
+    "/etc/group": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-02-10T11:24:33Z",
+      "size_bytes": 145,
+      "content": "root:x:0:\ndaemon:x:1:\nbin:x:2:\nsys:x:3:\nadm:x:4:syslog,ubuntu\ntty:x:5:\ndisk:x:6:\nwww-data:x:33:\nsudo:x:27:ubuntu\nnogroup:x:65534:\nubuntu:x:1000:\n"
+    },
+    "/home": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "children": [
+        "ubuntu"
+      ]
+    },
+    "/home/ubuntu": {
+      "type": "directory",
+      "owner": "ubuntu",
+      "group": "ubuntu",
+      "permissions": "750",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-14T17:43:09Z",
+      "children": [
+        ".bash_history",
+        ".bashrc",
+        ".profile",
+        ".ssh"
+      ]
+    },
+    "/home/ubuntu/.bash_history": {
+      "type": "file",
+      "owner": "ubuntu",
+      "group": "ubuntu",
+      "permissions": "600",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-14T17:43:09Z",
+      "size_bytes": 121,
+      "content": "ls -la\nsudo apt update\nnginx -t\nsudo systemctl restart nginx\ntail -f /var/log/nginx/access.log\ndf -h\nfree -m\nwhoami\nexit\n"
+    },
+    "/home/ubuntu/.bashrc": {
+      "type": "file",
+      "owner": "ubuntu",
+      "group": "ubuntu",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 211,
+      "content": "# ~/.bashrc: executed by bash(1) for non-login shells.\ncase $- in\n    *i*) ;;\n      *) return;;\nesac\n\nHISTCONTROL=ignoreboth\nHISTSIZE=1000\nHISTFILESIZE=2000\n\nalias ll='ls -alF'\nalias la='ls -A'\nalias l='ls -CF'\n"
+    },
+    "/home/ubuntu/.profile": {
+      "type": "file",
+      "owner": "ubuntu",
+      "group": "ubuntu",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 232,
+      "content": "# ~/.profile: executed by the command interpreter for login shells.\nif [ -n \"$BASH_VERSION\" ]; then\n    if [ -f \"$HOME/.bashrc\" ]; then\n        . \"$HOME/.bashrc\"\n    fi\nfi\n\nif [ -d \"$HOME/bin\" ] ; then\n    PATH=\"$HOME/bin:$PATH\"\nfi\n"
+    },
+    "/root": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "700",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-10T09:14:22Z",
+      "children": [
+        ".bash_history",
+        ".bashrc",
+        ".profile",
+        ".ssh"
+      ]
+    },
+    "/root/.bash_history": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "600",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-10T09:14:22Z",
+      "size_bytes": 180,
+      "content": "apt update && apt upgrade -y\nnginx -t\nsystemctl restart nginx\nsystemctl status nginx\nufw status\ncertbot renew\ntail -f /var/log/nginx/error.log\ncrontab -l\nls -la /var/www/html\nexit\n"
+    },
+    "/root/.bashrc": {
+      "type": "file",
+      "owner": "root",
+      "group": "root",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 181,
+      "content": "# ~/.bashrc: executed by bash(1) for non-login shells.\nexport PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nalias ll='ls -alF'\nalias la='ls -A'\nalias l='ls -CF'\n"
+    },
+    "/tmp": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "1777",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "children": []
+    },
+    "/var": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-02-10T11:24:33Z",
+      "children": [
+        "backups",
+        "cache",
+        "lib",
+        "log",
+        "spool",
+        "tmp",
+        "www"
+      ]
+    },
+    "/var/log": {
+      "type": "directory",
+      "owner": "root",
+      "group": "root",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "children": [
+        "auth.log",
+        "dpkg.log",
+        "nginx",
+        "syslog"
+      ]
+    },
+    "/var/log/auth.log": {
+      "type": "file",
+      "owner": "root",
+      "group": "adm",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "size_bytes": 621,
+      "content": "Apr 14 17:43:09 web-srv-03 sshd[2201]: Accepted publickey for ubuntu from 192.168.1.100 port 51204 ssh2: RSA SHA256:aB3cD4eF5\nApr 14 17:43:09 web-srv-03 sshd[2201]: pam_unix(sshd:session): session opened for user ubuntu by (uid=0)\nApr 14 23:59:01 web-srv-03 CRON[2341]: pam_unix(cron:session): session opened for user root by (uid=0)\nApr 14 23:59:01 web-srv-03 CRON[2341]: pam_unix(cron:session): session closed for user root\nApr 15 17:01:01 web-srv-03 CRON[3102]: pam_unix(cron:session): session opened for user root by (uid=0)\nApr 15 17:01:01 web-srv-03 CRON[3102]: pam_unix(cron:session): session closed for user root\n"
+    },
+    "/var/log/syslog": {
+      "type": "file",
+      "owner": "syslog",
+      "group": "adm",
+      "permissions": "640",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "size_bytes": 395,
+      "content": "Apr 15 23:17:01 web-srv-03 CRON[28401]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)\nApr 15 23:39:01 web-srv-03 systemd[1]: Starting Daily apt download activities...\nApr 15 23:39:04 web-srv-03 systemd[1]: apt-daily.service: Succeeded.\nApr 15 23:39:04 web-srv-03 systemd[1]: Finished Daily apt download activities.\nApr 15 23:59:01 web-srv-03 systemd[1]: logrotate.service: Succeeded.\n"
+    },
+    "/var/log/nginx": {
+      "type": "directory",
+      "owner": "root",
+      "group": "adm",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "children": [
+        "access.log",
+        "error.log"
+      ]
+    },
+    "/var/log/nginx/access.log": {
+      "type": "file",
+      "owner": "www-data",
+      "group": "adm",
+      "permissions": "644",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-15T23:59:01Z",
+      "size_bytes": 369,
+      "content": "192.168.1.55 - - [15/Apr/2026:09:14:03 +0000] \"GET / HTTP/1.1\" 200 612 \"-\" \"Mozilla/5.0\"\n192.168.1.55 - - [15/Apr/2026:09:14:04 +0000] \"GET /favicon.ico HTTP/1.1\" 404 162 \"-\" \"Mozilla/5.0\"\n10.0.2.88 - - [15/Apr/2026:14:22:17 +0000] \"GET /health HTTP/1.1\" 200 2 \"-\" \"curl/7.68.0\"\n10.0.2.88 - - [15/Apr/2026:14:22:18 +0000] \"GET /health HTTP/1.1\" 200 2 \"-\" \"curl/7.68.0\"\n"
+    },
+    "/var/log/nginx/error.log": {
+      "type": "file",
+      "owner": "www-data",
+      "group": "adm",
+      "permissions": "644",
+      "created": "2026-04-01T00:00:00Z",
+      "modified": "2026-04-12T11:03:07Z",
+      "size_bytes": 371,
+      "content": "2026/04/10 03:14:22 [error] 1135#1135: *42 open() \"/var/www/html/robots.txt\" failed (2: No such file or directory), client: 45.77.19.12, server: _, request: \"GET /robots.txt HTTP/1.1\"\n2026/04/12 11:03:07 [error] 1135#1135: *88 open() \"/var/www/html/wp-login.php\" failed (2: No such file or directory), client: 188.40.2.7, server: _, request: \"GET /wp-login.php HTTP/1.1\"\n"
+    },
+    "/var/www": {
+      "type": "directory",
+      "owner": "www-data",
+      "group": "www-data",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "children": [
+        "html"
+      ]
+    },
+    "/var/www/html": {
+      "type": "directory",
+      "owner": "www-data",
+      "group": "www-data",
+      "permissions": "755",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "children": [
+        "index.html"
+      ]
+    },
+    "/var/www/html/index.html": {
+      "type": "file",
+      "owner": "www-data",
+      "group": "www-data",
+      "permissions": "644",
+      "created": "2025-06-15T08:00:00Z",
+      "modified": "2025-06-15T08:00:00Z",
+      "size_bytes": 243,
+      "content": "<!DOCTYPE html>\n<html>\n<head><title>Welcome to nginx!</title></head>\n<body>\n<h1>Welcome to nginx!</h1>\n<p>If you see this page, the nginx web server is successfully installed and\nworking. Further configuration is required.</p>\n</body>\n</html>\n"
+    }
+  },
+  "disk": {
+    "total_gb": 25,
+    "used_gb": 4.2,
+    "available_gb": 19.9,
+    "use_percent": 18,
+    "filesystem": "/dev/sda1",
+    "mount": "/"
+  },
+  "memory": {
+    "total_mb": 2048,
+    "used_mb": 734,
+    "free_mb": 187,
+    "shared_mb": 12,
+    "buff_cache_mb": 1127,
+    "available_mb": 1118
+  },
+  "environment_defaults": {
+    "ubuntu": {
+      "USER": "ubuntu",
+      "HOME": "/home/ubuntu",
+      "SHELL": "/bin/bash",
+      "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/home/ubuntu",
+      "PS1": "ubuntu@web-srv-03:~$ "
+    },
+    "root": {
+      "USER": "root",
+      "HOME": "/root",
+      "SHELL": "/bin/bash",
+      "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+      "LANG": "en_US.UTF-8",
+      "PWD": "/root",
+      "PS1": "root@web-srv-03:~# "
+    }
+  }
+}
