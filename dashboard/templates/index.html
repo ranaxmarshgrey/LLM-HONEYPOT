@@ -634,17 +634,17 @@
                     <div class="stat-card green">
                         <div class="stat-label">Session Engagement</div>
                         <div class="stat-value green" id="stat-avg-duration">--</div>
-                        <div class="stat-compare">Cowrie avg: <span class="vs" id="stat-cowrie-duration">~44s</span> <span style="font-size:9px">(Vetterl 2020)</span></div>
+                        <div class="stat-compare">this session (simulated)</div>
                     </div>
                     <div class="stat-card yellow">
                         <div class="stat-label">Level 3+ Reached</div>
                         <div class="stat-value yellow" id="stat-level3">--%</div>
-                        <div class="stat-compare">Cowrie avg: <span class="vs">~12%</span> <span style="font-size:9px">(Nawrocki 2019)</span></div>
+                        <div class="stat-compare">this session (simulated)</div>
                     </div>
                     <div class="stat-card blue">
                         <div class="stat-label">Fingerprint Resistance</div>
                         <div class="stat-value blue" id="stat-fingerprint">--/22</div>
-                        <div class="stat-compare">Cowrie: <span class="vs">8/22</span> <span style="font-size:9px">(our test suite)</span></div>
+                        <div class="stat-compare">Cowrie expected: <span class="vs">8/22</span> <span style="font-size:9px">(documented behaviour, not live test)</span></div>
                     </div>
                     <div class="stat-card purple">
                         <div class="stat-label">Persona Switches</div>
@@ -669,10 +669,9 @@
 
     <!-- Methodology footer -->
     <footer style="padding: 12px 24px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-dim); line-height: 1.6;">
-        <strong style="color: var(--text-secondary);">Methodology:</strong>
-        Fingerprint scores measured by 22 automated checks (timing, cross-reference consistency, write persistence, Cowrie-signature detection) run against our dispatcher.
-        Cowrie baseline: checks adapted from Vetterl &amp; Clayton (2018) honeypot detection techniques, scored against documented Cowrie behaviour.
-        Session engagement is simulated (scripted command sequences); real-attacker deployment is Phase-3 future work.
+        <strong style="color: var(--text-secondary);">Methodology note:</strong>
+        Fingerprint resistance: 22 automated checks (timing, cross-reference consistency, write persistence, Cowrie-signature detection) run against our dispatcher; Cowrie baseline scored against documented Cowrie behaviour using the same 22 checks.
+        Session data shown is from a <em>simulated/scripted command sequence</em> run by the development team to demonstrate mechanism behaviour &mdash; not a real attacker session. Real-attacker deployment is Phase-3 future work.
     </footer>
 
     <!-- ============================================================

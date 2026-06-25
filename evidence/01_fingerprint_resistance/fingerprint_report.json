@@ -1,22 +1,49 @@
 {
-  "generated_at": "2026-06-25T09:42:16.859435+00:00",
+  "title": "Automated fingerprint-detection self-test (22 known Cowrie/honeypot-detection techniques)",
+  "generated_at": "2026-06-25T10:15:34.427467+00:00",
   "our_system": {
     "total_checks": 22,
     "passed": 22,
     "failed": 0,
+    "categories": {
+      "Timing Realism": {
+        "passed": 3,
+        "total": 3
+      },
+      "Filesystem Consistency": {
+        "passed": 5,
+        "total": 5
+      },
+      "Process & Network Realism": {
+        "passed": 4,
+        "total": 4
+      },
+      "Session & Environment Realism": {
+        "passed": 4,
+        "total": 4
+      },
+      "Write-Operation Fidelity": {
+        "passed": 3,
+        "total": 3
+      },
+      "Cowrie Signature Avoidance": {
+        "passed": 3,
+        "total": 3
+      }
+    },
     "results": [
       {
         "name": "timing_simple_cmd",
         "passed": true,
         "expected": "< 200ms",
-        "actual": "49.1ms",
-        "notes": "ls returned 0 chars in 49.1ms"
+        "actual": "20.2ms",
+        "notes": "ls returned 0 chars in 20.2ms"
       },
       {
         "name": "timing_complex_cmd",
         "passed": true,
         "expected": "> 10ms (jitter present)",
-        "actual": "203.0ms",
+        "actual": "127.5ms",
         "notes": "Complex commands should have realistic delay"
       },
       {
@@ -24,7 +51,7 @@
         "passed": true,
         "expected": "Timing variance > 0",
         "actual": "5 unique times out of 5 runs",
-        "notes": "Times (ms): [46.83, 31.51, 46.34, 46.27, 31.0]"
+        "notes": "Times (ms): [31.94, 16.45, 62.36, 16.02, 46.82]"
       },
       {
         "name": "cross_ref_passwd_whoami",
@@ -72,7 +99,7 @@
         "name": "uptime_increases",
         "passed": true,
         "expected": "uptime contains 'up' and looks realistic",
-        "actual": "uptime1= 09:42:15 up 21 days,  9:08,  2 user,  load averag",
+        "actual": "uptime1= 10:15:35 up 21 days,  9:08,  2 user,  load averag",
         "notes": ""
       },
       {

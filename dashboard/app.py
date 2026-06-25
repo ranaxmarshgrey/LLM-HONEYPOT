@@ -221,12 +221,9 @@ class DashboardDataManager:
         return {
             "avg_duration_seconds": round(avg_duration, 1),
             "avg_duration_display": _format_duration(avg_duration),
-            "cowrie_avg_duration": "0m 44s",
             "level3_plus_pct": round(level3_pct, 1),
-            "cowrie_level3_pct": 11,
             "fingerprint_score": self.fingerprint_score,
             "fingerprint_total": self.fingerprint_total,
-            "cowrie_fingerprint": 8,
             "persona_switches_today": len(self._persona_switches),
             "unique_ips_today": len(self._unique_ips),
             "total_sessions_today": self.total_sessions_today,

