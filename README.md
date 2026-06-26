@@ -391,6 +391,8 @@ adaptive-honeypot/
 |-- README.md                         # This file
 |-- .env.example                      # API key template
 |-- requirements.txt
+|-- package.json                      # Next.js frontend dependencies
+|-- next.config.mjs                   # Next.js config (API proxy to FastAPI)
 |
 |-- honeypot/                         # Core system modules
 |   |-- cowrie_hook.py                # Cowrie glue layer, per-session dispatcher
@@ -413,9 +415,42 @@ adaptive-honeypot/
 |   |-- dev_workstation.json          # Developer machine
 |   |-- finance_server.json           # Finance production server
 |
+|-- app/                              # Next.js frontend (v0 design)
+|   |-- page.tsx                     # Dashboard page (client component)
+|   |-- layout.tsx                   # Root layout
+|   |-- globals.css                  # Tailwind + theme tokens
+|
+|-- components/                       # React UI components
+|   |-- dashboard-header.tsx         # Header with live/demo status
+|   |-- kpi-row.tsx                  # 5 KPI stat cards
+|   |-- active-sessions.tsx          # Active session list panel
+|   |-- threat-timeline.tsx          # Threat score chart (Recharts)
+|   |-- command-feed.tsx             # Live command feed panel
+|   |-- system-stats.tsx             # System performance comparison
+|   |-- panel-shell.tsx              # Reusable panel container
+|   |-- threat-badge.tsx             # Threat level badge
+|
+|-- lib/                              # Frontend utilities
+|   |-- use-honeypot-data.ts         # WebSocket hook (live) + simulator fallback
+|   |-- types.ts                     # TypeScript interfaces
+|   |-- format.ts                    # Formatting helpers
+|   |-- simulator.ts                 # Client-side demo data generator
+|   |-- utils.ts                     # Tailwind merge utility
+|
+|-- dashboard/                        # FastAPI backend + legacy HTML dashboard
+|   |-- app.py                       # FastAPI app (REST + WebSocket + CORS)
+|   |-- templates/index.html         # Legacy single-file dark-themed dashboard
+|
 |-- event_logging/                    # Structured logging
 |   |-- session_logger.py            # JSON-lines logger with rotation
 |   |-- logs/                        # Log output directory
+|
+|-- scripts/
+|   |-- interactive_honeypot.py      # Interactive shell — be the attacker
+|   |-- attack_scenarios.py          # 4 real-world attack pattern scripts
+|   |-- demo_session.py              # 10-command panel demo
+|   |-- setup.sh                     # VM setup automation
+|   |-- deploy.sh                    # Deployment script
 |
 |-- tests/                            # 1279 tests
 |   |-- test_fakefs.py               # FakeFS query + consistency
@@ -434,12 +469,6 @@ adaptive-honeypot/
 |   |-- test_persona_switcher.py     # Gradual drift verification
 |   |-- test_sprint3_acceptance.py   # End-to-end acceptance
 |   |-- test_cowrie_integration.py   # Live SSH integration
-|
-|-- scripts/
-|   |-- setup.sh                     # VM setup automation
-|   |-- deploy.sh                    # Deployment script
-|
-|-- dashboard/                        # Web dashboard (Sprint 6)
 ```
 
 ---
@@ -450,9 +479,11 @@ adaptive-honeypot/
 |-------|-----------|
 | SSH Layer | Cowrie (Python) |
 | Backend | Python 3.11+ |
+| Frontend | Next.js 15, React 19, Tailwind CSS 4, Recharts |
+| Dashboard API | FastAPI + WebSocket (real-time push every 2s) |
 | Data Models | Pydantic v2 |
 | FakeFS Storage | JSON files (one per persona) |
-| LLM API | Anthropic Claude API (primary) |
+| LLM API | Gemini / Anthropic Claude API |
 | IP Reputation | AbuseIPDB API (free tier) |
 | HTTP Client | httpx (async) |
 | Logging | Python logging -> JSON-lines -> daily rotation |
@@ -466,8 +497,9 @@ adaptive-honeypot/
 
 ### Prerequisites
 - Python 3.11+
-- Cowrie SSH honeypot (for live deployment)
-- Anthropic API key (for LLM slow path)
+- Node.js 18+ (for the Next.js frontend)
+- Cowrie SSH honeypot (for live deployment only)
+- Gemini or Anthropic API key (for LLM slow path; optional — dictionary fast path works without it)
 - AbuseIPDB API key (optional, for IP reputation)
 
 ### Setup
@@ -476,19 +508,56 @@ adaptive-honeypot/
 git clone <repo-url>
 cd adaptive-honeypot
 
-# Create virtual environment
+# Python backend
 python -m venv .venv
 source .venv/bin/activate       # Linux/Mac
 # .venv\Scripts\activate        # Windows
-
-# Install dependencies
 pip install -r requirements.txt
+
+# Next.js frontend
+npm install
 
 # Configure API keys
 cp .env.example .env
 # Edit .env and add:
+#   GEMINI_API_KEY=...
 #   ANTHROPIC_API_KEY=sk-ant-...
 #   ABUSEIPDB_API_KEY=...
+```
+
+### Run the Dashboard (Two-Pane Setup)
+
+```bash
+# Terminal 1 — FastAPI backend (serves REST + WebSocket on port 8080)
+python -m uvicorn dashboard.app:app --host 0.0.0.0 --port 8080
+
+# Terminal 2 — Next.js frontend (serves UI on port 3000)
+npm run dev
+
+# Terminal 3 — Be the attacker (interactive shell)
+python scripts/interactive_honeypot.py
+
+# Open http://localhost:3000 in your browser
+# Type commands in Terminal 3 and watch the dashboard update in real time
+```
+
+### Run Attack Scenarios
+
+```bash
+# List all available attack scenarios
+python scripts/attack_scenarios.py --list
+
+# Run a specific scenario
+python scripts/attack_scenarios.py --scenario botnet        # Mirai-style download & execute
+python scripts/attack_scenarios.py --scenario credential    # SSH key theft + credential harvesting
+python scripts/attack_scenarios.py --scenario privesc       # Privilege escalation enumeration
+python scripts/attack_scenarios.py --scenario persistence   # Post-exploitation + anti-forensics
+
+# Run all 4 scenarios as simultaneous attacker sessions
+python scripts/attack_scenarios.py --scenario all
+
+# Adjust timing (0.5 = fast, 1.0 = normal, 2.0 = slow for presentation)
+python scripts/attack_scenarios.py --scenario credential --speed 2.0
 ```
 
 ### Run Tests
@@ -526,6 +595,21 @@ What percentage of sessions reach Level 3+ (privilege escalation)? Compared agai
 
 ---
 
+## Attack Scenarios
+
+Four realistic attack patterns modeled after documented real-world attacker behavior:
+
+| Scenario | Commands | Pattern | What It Exercises |
+|----------|----------|---------|-------------------|
+| `botnet` | 15 | Mirai-style automated download & execute | Fast scripted attack, no exploration — 95% of real honeypot traffic |
+| `credential` | 17 | SSH key theft + password hash harvesting | Methodical human attacker, triggers full escalation to CRITICAL |
+| `privesc` | 17 | GTFOBins/LinPEAS-style SUID/sudo enumeration | Skilled attacker systematically checking every escalation vector |
+| `persistence` | 18 | Backdoor user + cron persistence + log wiping | Post-exploitation establishing long-term access and covering tracks |
+
+Each scenario sends real commands through the full pipeline (FakeFS -> Dictionary/LLM -> Threat Scorer -> Persona Switcher) with human-like variable timing between commands.
+
+---
+
 ## Sprint History
 
 | Sprint | Delivered | Tests |
@@ -535,4 +619,4 @@ What percentage of sessions reach Level 3+ (privilege escalation)? Compared agai
 | Sprint 3 | Response Engine (40+ handlers), session overlay, command parser, Cowrie hook | 800+ |
 | Sprint 4 | Threat Scorer (120+ scores, 9 patterns), IP Reputation, Session Manager | 1100+ |
 | Sprint 5 | Persona Switcher (gradual drift), FakeFS session extensions, full wiring | 1279 |
-| Sprint 6 | Dashboard, evaluation, real-world data collection | Planned |
+| Sprint 6 | Dashboard (Next.js + FastAPI), attack scenarios, interactive shell, evaluation | 1279 |
