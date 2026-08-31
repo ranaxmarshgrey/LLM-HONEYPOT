@@ -26,8 +26,10 @@ Sprint target: Sprint 3.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
+import urllib.request
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
@@ -45,6 +47,22 @@ _SOURCE_TO_LOG_SOURCE = {
     "llm": "llm",
     "fallback": "dict",
 }
+
+
+def _notify_dashboard(endpoint: str, payload: dict) -> None:
+    """Best-effort HTTP push to the live dashboard endpoints."""
+    try:
+        url = f"http://127.0.0.1:8080{endpoint}"
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=1)
+    except Exception:
+        pass
+
 
 
 class HoneypotCommandDispatcher:
@@ -104,6 +122,14 @@ class HoneypotCommandDispatcher:
             session_id=session_id,
             attacker_ip=attacker_ip,
             attacker_port=attacker_port,
+        )
+        _notify_dashboard(
+            "/api/session/start",
+            {
+                "session_id": session_id,
+                "attacker_ip": attacker_ip,
+                "persona": persona_name,
+            },
         )
 
     def _pick_primary_user(self):
@@ -200,6 +226,7 @@ class HoneypotCommandDispatcher:
             and decision.switch_to_persona
             and not self._switcher.is_transitioning()
         ):
+            from_p = self._persona_name
             started = self._switcher.initiate_switch(
                 self._session_id,
                 self._persona_name,
@@ -214,6 +241,15 @@ class HoneypotCommandDispatcher:
                     self._persona_name,
                     decision.switch_to_persona,
                     decision.switch_reason,
+                )
+                _notify_dashboard(
+                    "/api/session/switch",
+                    {
+                        "session_id": self._session_id,
+                        "from_persona": from_p,
+                        "to_persona": decision.switch_to_persona,
+                        "trigger_score": self._threat_score,
+                    },
                 )
             self._persona_name = decision.switch_to_persona
 
@@ -233,7 +269,7 @@ class HoneypotCommandDispatcher:
             self._session.patterns_detected.add(p)
         self._session.threat_score = self._threat_score
 
-        # 5. Log
+        # 5. Log & Notify Dashboard
         log_source = _SOURCE_TO_LOG_SOURCE.get(source, "dict")
         self._logger.log_command(
             session_id=self._session_id,
@@ -247,12 +283,27 @@ class HoneypotCommandDispatcher:
             threat_level=decision.threat_level.value,
             patterns_detected=decision.patterns_detected or None,
         )
+        _notify_dashboard(
+            "/api/session/command",
+            {
+                "session_id": self._session_id,
+                "command": raw_input.strip(),
+                "score_after": self._threat_score,
+                "score_delta": decision.score_delta,
+                "category": decision.command_category.value,
+                "threat_level": decision.threat_level.value,
+                "persona": self._persona_name,
+                "response_source": log_source,
+            },
+        )
 
         return response, source
 
     def close(self) -> None:
         """End this session. Emits a session_end log event."""
         self._logger.log_session_end(session_id=self._session_id)
+        _notify_dashboard("/api/session/end", {"session_id": self._session_id})
+
 
     def get_summary(self) -> dict:
         """Return the session logger's summary for this session."""
