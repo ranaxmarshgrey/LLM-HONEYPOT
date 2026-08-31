@@ -80,10 +80,11 @@ ok "patch module installed at ${PATCH_DEST}"
 log "installing project requirements into Cowrie virtualenv"
 COWRIE_VENV="${COWRIE_HOME}/cowrie-env"
 if [[ -x "${COWRIE_VENV}/bin/pip" ]]; then
+  "${COWRIE_VENV}/bin/pip" install --quiet -e "${COWRIE_HOME}"
   "${COWRIE_VENV}/bin/pip" install --quiet \
     python-dotenv pydantic 'pydantic-settings>=2.2.0' \
     'google-generativeai>=0.8.0' \
-    'anthropic>=0.25.0' 'httpx>=0.27.0'
+    'anthropic>=0.25.0' 'httpx>=0.27.0' requests python-json-logger
   ok "dependencies installed"
 else
   warn "Cowrie virtualenv not found at ${COWRIE_VENV} — install deps manually"
