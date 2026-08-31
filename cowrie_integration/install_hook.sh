@@ -154,6 +154,26 @@ def _hp_handle_command(protocol, cmd_string):
         logging.getLogger("cowrie.adaptive").error("Command handling failed: %s", e)
         return None
 
+def _hp_intercept_line(protocol, line):
+    \"\"\"Intercept incoming lineReceived line and output adaptive response if handled.\"\"\"
+    try:
+        line_str = line.decode('utf-8', errors='ignore') if isinstance(line, bytes) else str(line)
+        res = _hp_handle_command(protocol, line_str)
+        if res is not None:
+            out, prompt = res
+            if out and not out.endswith('\n'):
+                out += '\n'
+            if hasattr(protocol, 'terminal') and protocol.terminal:
+                protocol.terminal.write(out.encode('utf-8'))
+                protocol.terminal.write(prompt.encode('utf-8'))
+            elif hasattr(protocol, 'sendLine'):
+                protocol.sendLine(out.encode('utf-8'))
+            return True
+    except Exception as e:
+        import logging
+        logging.getLogger("cowrie.adaptive").error("Intercept line error: %s", e)
+    return False
+
 def _hp_close_session(protocol):
     \"\"\"Clean up when a session ends.\"\"\"
     sid = str(getattr(protocol, "sessionno", id(protocol)))
@@ -173,33 +193,15 @@ if import_end == -1:
     import_end = content.rfind("\n\n")
 content = content[:import_end] + patch_import + content[import_end:]
 
-# Insert hook at beginning of lineReceived definition using regex
+# Insert single-line hook at beginning of lineReceived definition using regex
 import re
 
-hook_code = """
-        # ADAPTIVE_HONEYPOT_EXEC_HOOK
-        try:
-            _line_str = line.decode('utf-8', errors='ignore') if isinstance(line, bytes) else str(line)
-            _res = _hp_handle_command(self, _line_str)
-            if _res is not None:
-                _out, _prompt = _res
-                if _out and not _out.endswith('\\n'):
-                    _out += '\\n'
-                if hasattr(self, 'terminal') and self.terminal:
-                    self.terminal.write(_out.encode('utf-8'))
-                    self.terminal.write(_prompt.encode('utf-8'))
-                elif hasattr(self, 'sendLine'):
-                    self.sendLine(_out.encode('utf-8'))
-                return
-        except Exception as _e:
-            import logging
-            logging.getLogger("cowrie.adaptive").error("Hook exec error: %s", _e)
-"""
+pattern = re.compile(r"(def\s+lineReceived\s*\([^)]*\)\s*(?:->\s*[^:]+)?\s*:\s*\n)")
+hook_single = "        if _hp_intercept_line(self, line): return\n"
 
-pattern = re.compile(r"(def\s+lineReceived\s*\([^)]*\)\s*(?:->\s*[^:]+)?\s*:)")
 if pattern.search(content):
-    content = pattern.sub(r"\1" + hook_code, content)
-    print("Found and patched lineReceived with regex")
+    content = pattern.sub(r"\1" + hook_single, content)
+    print("Found and patched lineReceived cleanly")
 else:
     print("WARNING: lineReceived not found in protocol.py!")
 
