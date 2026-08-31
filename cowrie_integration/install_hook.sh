@@ -97,17 +97,12 @@ log "patching Cowrie command handler"
 PROTOCOL_FILE="${COWRIE_HOME}/src/cowrie/shell/protocol.py"
 MARKER="# ADAPTIVE_HONEYPOT_PATCH"
 
-if grep -q "${MARKER}" "${PROTOCOL_FILE}" 2>/dev/null; then
-  log "Cowrie already patched — skipping"
-else
-  # Backup original
-  cp "${PROTOCOL_FILE}" "${PROTOCOL_FILE}.bak"
-  log "backed up original to ${PROTOCOL_FILE}.bak"
+# Restore backup if available so we can re-patch cleanly
+if [[ -f "${PROTOCOL_FILE}.bak" ]]; then
+  cp "${PROTOCOL_FILE}.bak" "${PROTOCOL_FILE}"
+fi
 
-  # We patch the lineReceived method to intercept commands.
-  # This is a targeted patch that adds our hook at the start of
-  # the method body.
-  python3 - "${PROTOCOL_FILE}" "${MARKER}" "${PROJECT_DIR}" <<'PYSCRIPT'
+python3 - "${PROTOCOL_FILE}" "${MARKER}" "${PROJECT_DIR}" <<'PYSCRIPT'
 import sys
 
 filepath = sys.argv[1]
@@ -116,10 +111,6 @@ project_dir = sys.argv[3]
 
 with open(filepath, "r") as f:
     content = f.read()
-
-# Find the class HoneyPotInteractiveProtocol or similar
-# and patch its lineReceived method to intercept commands.
-# We add an import and a hook call at the top of the file.
 
 patch_import = f"""
 {marker}
@@ -155,7 +146,9 @@ def _hp_handle_command(protocol, cmd_string):
         return None  # fall through to default Cowrie handling
     try:
         from cowrie_integration.cowrie_command_patch import handle_command
-        return handle_command(dispatcher, cmd_string)
+        output = handle_command(dispatcher, cmd_string)
+        prompt = dispatcher.prompt
+        return output, prompt
     except Exception as e:
         import logging
         logging.getLogger("cowrie.adaptive").error("Command handling failed: %s", e)
@@ -174,17 +167,50 @@ def _hp_close_session(protocol):
 {marker}_END
 """
 
-if marker not in content:
-    # Add import block after the existing imports
-    import_end = content.rfind("\nclass ")
-    if import_end == -1:
-        import_end = content.rfind("\n\n")
-    content = content[:import_end] + patch_import + content[import_end:]
+# Add imports at top
+import_end = content.rfind("\nclass ")
+if import_end == -1:
+    import_end = content.rfind("\n\n")
+content = content[:import_end] + patch_import + content[import_end:]
+
+# Patch lineReceived method in HoneyPotBaseProtocol or HoneyPotExecProtocol
+hook_code = """
+        # ADAPTIVE_HONEYPOT_EXEC_HOOK
+        try:
+            _line_str = line.decode('utf-8', errors='ignore') if isinstance(line, bytes) else str(line)
+            _res = _hp_handle_command(self, _line_str)
+            if _res is not None:
+                _out, _prompt = _res
+                if _out and not _out.endswith('\\n'):
+                    _out += '\\n'
+                if hasattr(self, 'terminal') and self.terminal:
+                    self.terminal.write(_out.encode('utf-8'))
+                    self.terminal.write(_prompt.encode('utf-8'))
+                elif hasattr(self, 'sendLine'):
+                    self.sendLine(_out.encode('utf-8'))
+                return
+        except Exception as _e:
+            pass
+"""
+
+# Insert hook at beginning of lineReceived definition
+target_def = "def lineReceived(self, line"
+if target_def in content:
+    parts = content.split(target_def)
+    new_parts = [parts[0]]
+    for p in parts[1:]:
+        # Find end of def line (colon)
+        colon_pos = p.find(":\n")
+        if colon_pos != -1:
+            new_parts.append(target_def + p[:colon_pos + 2] + hook_code + p[colon_pos + 2:])
+        else:
+            new_parts.append(target_def + p)
+    content = "".join(new_parts)
 
 with open(filepath, "w") as f:
     f.write(content)
 
-print(f"Patched {filepath}")
+print(f"Patched {filepath} successfully")
 PYSCRIPT
 
   ok "Cowrie command handler patched"
