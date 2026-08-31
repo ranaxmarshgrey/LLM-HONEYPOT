@@ -173,26 +173,6 @@ if import_end == -1:
     import_end = content.rfind("\n\n")
 content = content[:import_end] + patch_import + content[import_end:]
 
-# Patch lineReceived method in HoneyPotBaseProtocol or HoneyPotExecProtocol
-hook_code = """
-        # ADAPTIVE_HONEYPOT_EXEC_HOOK
-        try:
-            _line_str = line.decode('utf-8', errors='ignore') if isinstance(line, bytes) else str(line)
-            _res = _hp_handle_command(self, _line_str)
-            if _res is not None:
-                _out, _prompt = _res
-                if _out and not _out.endswith('\\n'):
-                    _out += '\\n'
-                if hasattr(self, 'terminal') and self.terminal:
-                    self.terminal.write(_out.encode('utf-8'))
-                    self.terminal.write(_prompt.encode('utf-8'))
-                elif hasattr(self, 'sendLine'):
-                    self.sendLine(_out.encode('utf-8'))
-                return
-        except Exception as _e:
-            pass
-"""
-
 # Insert hook at beginning of lineReceived definition using regex
 import re
 
@@ -229,8 +209,7 @@ with open(filepath, "w") as f:
 print(f"Patched {filepath} successfully")
 PYSCRIPT
 
-  ok "Cowrie command handler patched"
-fi
+ok "Cowrie command handler patched"
 
 # ---------------------------------------------------------------------------
 # 5. Restart Cowrie
