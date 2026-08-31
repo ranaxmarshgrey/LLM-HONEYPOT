@@ -59,7 +59,7 @@ mkdir -p "${SYSTEMD_OVERRIDE_DIR}"
 cat > "${SYSTEMD_OVERRIDE_DIR}/honeypot.conf" <<EOF
 [Service]
 Environment=HONEYPOT_PROJECT_DIR=${PROJECT_DIR}
-Environment=PYTHONPATH=${PROJECT_DIR}
+Environment=PYTHONPATH=${COWRIE_HOME}/src:${PROJECT_DIR}
 EnvironmentFile=-${PROJECT_DIR}/.env
 EOF
 systemctl daemon-reload
