@@ -193,19 +193,35 @@ hook_code = """
             pass
 """
 
-# Insert hook at beginning of lineReceived definition
-target_def = "def lineReceived(self, line"
-if target_def in content:
-    parts = content.split(target_def)
-    new_parts = [parts[0]]
-    for p in parts[1:]:
-        # Find end of def line (colon)
-        colon_pos = p.find(":\n")
-        if colon_pos != -1:
-            new_parts.append(target_def + p[:colon_pos + 2] + hook_code + p[colon_pos + 2:])
-        else:
-            new_parts.append(target_def + p)
-    content = "".join(new_parts)
+# Insert hook at beginning of lineReceived definition using regex
+import re
+
+hook_code = """
+        # ADAPTIVE_HONEYPOT_EXEC_HOOK
+        try:
+            _line_str = line.decode('utf-8', errors='ignore') if isinstance(line, bytes) else str(line)
+            _res = _hp_handle_command(self, _line_str)
+            if _res is not None:
+                _out, _prompt = _res
+                if _out and not _out.endswith('\\n'):
+                    _out += '\\n'
+                if hasattr(self, 'terminal') and self.terminal:
+                    self.terminal.write(_out.encode('utf-8'))
+                    self.terminal.write(_prompt.encode('utf-8'))
+                elif hasattr(self, 'sendLine'):
+                    self.sendLine(_out.encode('utf-8'))
+                return
+        except Exception as _e:
+            import logging
+            logging.getLogger("cowrie.adaptive").error("Hook exec error: %s", _e)
+"""
+
+pattern = re.compile(r"(def\s+lineReceived\s*\([^)]*\)\s*(?:->\s*[^:]+)?\s*:)")
+if pattern.search(content):
+    content = pattern.sub(r"\1" + hook_code, content)
+    print("Found and patched lineReceived with regex")
+else:
+    print("WARNING: lineReceived not found in protocol.py!")
 
 with open(filepath, "w") as f:
     f.write(content)
