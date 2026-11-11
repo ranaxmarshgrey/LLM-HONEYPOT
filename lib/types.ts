@@ -68,4 +68,19 @@ export interface DashboardPayload {
   timestamp: string
 }
 
+export interface ScriptItem {
+  id: string
+  title: string
+  category: string
+  script: string
+  args: string[]
+  command_count: number
+  estimated_duration: string
+  attack_pattern: string
+  design_patterns: string[]
+  description: string
+  highlights: string[]
+}
+
 export type ConnectionStatus = "live" | "demo" | "connecting"
+

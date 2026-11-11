@@ -8,6 +8,7 @@ import { ActiveSessions } from "@/components/active-sessions"
 import { ThreatTimeline } from "@/components/threat-timeline"
 import { CommandFeed } from "@/components/command-feed"
 import { SystemStats } from "@/components/system-stats"
+import { ScriptLauncher } from "@/components/script-launcher"
 
 export default function DashboardPage() {
   const { data, status } = useHoneypotData()
@@ -40,6 +41,9 @@ export default function DashboardPage() {
       {data ? (
         <>
           <KpiRow stats={data.stats} sessions={sessions} />
+
+          {/* Interactive Demo Launcher & Script Pattern Directory */}
+          <ScriptLauncher />
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="lg:col-span-1 lg:row-span-2 lg:max-h-[640px]">

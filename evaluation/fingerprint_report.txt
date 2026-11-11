@@ -1,11 +1,11 @@
 ===========================================================================
   FINGERPRINT RESISTANCE COMPARISON REPORT
-  Generated: 2026-06-23 04:48:59 UTC
+  Generated: 2026-10-24 13:54:25 UTC
 ===========================================================================
 
   Check                               Our System      Cowrie         
   ─────────────────────────────────────────────────────────────────
-  timing_simple_cmd                   PASS ✓          PASS ✓         
+  timing_simple_cmd                   FAIL ✗          PASS ✓         
   timing_complex_cmd                  PASS ✓          FAIL ✗         
   timing_variance                     PASS ✓          FAIL ✗         
   cross_ref_passwd_whoami             PASS ✓          PASS ✓         
@@ -28,10 +28,10 @@
   env_vars_realistic                  PASS ✓          FAIL ✗         
   shadow_permission                   PASS ✓          PASS ✓         
   ─────────────────────────────────────────────────────────────────
-  TOTAL                               22/22           8/22
+  TOTAL                               21/22           8/22
 ===========================================================================
 
   SUMMARY:
-    Our system passed 22/22 fingerprint checks
+    Our system passed 21/22 fingerprint checks
     Vanilla Cowrie passed 8/22 fingerprint checks
-    Improvement: +14 checks
+    Improvement: +13 checks

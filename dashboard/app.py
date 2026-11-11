@@ -36,7 +36,7 @@ app = FastAPI(title="Adaptive Honeypot Dashboard", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -402,6 +402,271 @@ async def api_dashboard_clear():
     data_manager.total_sessions_today = 0
     await data_manager.broadcast(data_manager.get_ws_update())
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Script Catalog & Subprocess Execution Launcher
+# ---------------------------------------------------------------------------
+
+import subprocess
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+SCRIPTS_CATALOG = [
+    {
+        "id": "demo_session",
+        "title": "Panel Presentation Demo 1 (Standard)",
+        "category": "Panel Presentation",
+        "script": "scripts/demo_session.py",
+        "args": [],
+        "command_count": 10,
+        "estimated_duration": "15s",
+        "attack_pattern": "Reconnaissance -> Exploration -> Sensitive File Exfiltration -> Persona Switch Trigger",
+        "design_patterns": ["Facade Pattern", "Observer Pattern", "Driver Test Double"],
+        "description": "Standard 10-command presentation sequence. Triggers persona switch from generic_linux to dev_workstation mid-session.",
+        "highlights": [
+            "whoami, id, uname -a recon",
+            "sudo privilege check & shadow read attempt",
+            "cat /home/john.dev/.env exfiltration",
+            "Live Persona Switch transition alert",
+        ],
+    },
+    {
+        "id": "demo_session_2",
+        "title": "Stealth Recon & Data Exfiltration Demo",
+        "category": "Panel Presentation",
+        "script": "scripts/demo_session_2.py",
+        "args": [],
+        "command_count": 14,
+        "estimated_duration": "20s",
+        "attack_pattern": "Stealth Recon -> linpeas.sh Download -> Directory Compression -> HTTP Exfiltration",
+        "design_patterns": ["Facade Pattern", "In-Memory Overlay Pattern", "Pipeline Pattern"],
+        "description": "Simulates a stealthy attacker searching config files, downloading enumeration scripts, and exfiltrating archives.",
+        "highlights": [
+            "netstat & find *.conf recon",
+            "wget linpeas.sh execution",
+            "tar backup creation in /tmp",
+            "curl POST exfiltration to attacker server",
+        ],
+    },
+    {
+        "id": "demo_session_3",
+        "title": "Loud & Ransomware / Lateral Movement Demo",
+        "category": "Panel Presentation",
+        "script": "scripts/demo_session_3.py",
+        "args": [],
+        "command_count": 10,
+        "estimated_duration": "15s",
+        "attack_pattern": "Immediate PrivEsc -> SSH Key Theft -> Lateral Movement -> Ransomware & Log Wipe",
+        "design_patterns": ["Facade Pattern", "Threat Taxonomy Classifier", "Overlay Isolation"],
+        "description": "High-noise attacker stealing SSH private keys, attempting lateral movement, and executing simulated log wiping.",
+        "highlights": [
+            "Direct cat /etc/shadow grab",
+            "cat ~/.ssh/id_rsa key theft",
+            "Lateral SSH connection attempt",
+            "Ransomware simulation & rm -rf /var/log/*",
+        ],
+    },
+    {
+        "id": "attack_botnet",
+        "title": "Botnet Automated Probe Scenario",
+        "category": "Attacker Scenarios",
+        "script": "scripts/attack_scenarios.py",
+        "args": ["--scenario", "botnet", "--speed", "0.5"],
+        "command_count": 12,
+        "estimated_duration": "10s",
+        "attack_pattern": "High-Speed Automated Botnet Scan & Mass Recon",
+        "design_patterns": ["Strategy Pattern", "Stochastic Timing Model"],
+        "description": "Simulates an automated botnet script scanning open ports, system uptime, and user enumeration at fast speed.",
+        "highlights": [
+            "Automated command burst",
+            "Stochastic human/bot typing intervals",
+            "Fast threat accumulation",
+        ],
+    },
+    {
+        "id": "attack_credential",
+        "title": "Credential Harvesting Attack Scenario",
+        "category": "Attacker Scenarios",
+        "script": "scripts/attack_scenarios.py",
+        "args": ["--scenario", "credential", "--speed", "0.8"],
+        "command_count": 10,
+        "estimated_duration": "12s",
+        "attack_pattern": "Targeted Key/Credential Search (.env, AWS keys, shadow)",
+        "design_patterns": ["Strategy Pattern", "Threat Threshold Switcher"],
+        "description": "Targeted adversary hunting for hardcoded passwords, AWS credentials, and environment config files.",
+        "highlights": [
+            "Targeted .env search",
+            "AWS credential hunting",
+            "High threat score escalation",
+        ],
+    },
+    {
+        "id": "attack_privesc",
+        "title": "Privilege Escalation Attack Scenario",
+        "category": "Attacker Scenarios",
+        "script": "scripts/attack_scenarios.py",
+        "args": ["--scenario", "privesc", "--speed", "0.8"],
+        "command_count": 11,
+        "estimated_duration": "15s",
+        "attack_pattern": "SUID Binary Search -> Sudo Exploit Attempt -> Root Shell Escalation",
+        "design_patterns": ["Strategy Pattern", "Persona Merging State Engine"],
+        "description": "Exploration of SUID binaries, sudoers configuration, and kernel vulnerability checking.",
+        "highlights": [
+            "find / -perm -4000 SUID search",
+            "cat /etc/sudoers check",
+            "Triggers high persona transition",
+        ],
+    },
+    {
+        "id": "attack_persistence",
+        "title": "Persistence & Backdoor Scenario",
+        "category": "Attacker Scenarios",
+        "script": "scripts/attack_scenarios.py",
+        "args": ["--scenario", "persistence", "--speed", "0.8"],
+        "command_count": 10,
+        "estimated_duration": "12s",
+        "attack_pattern": "Cron Injection -> SSH Authorized Keys -> Bashrc Persistence",
+        "design_patterns": ["Strategy Pattern", "In-Memory Write Overlay"],
+        "description": "Attacker attempting to establish persistent rootkits, backdoor users, and crontab entries.",
+        "highlights": [
+            "Crontab backdoor injection",
+            "echo to ~/.bashrc",
+            "Overlay filesystem modification",
+        ],
+    },
+    {
+        "id": "run_evaluation",
+        "title": "Academic Evaluation & Fingerprint Resistance Test",
+        "category": "Evaluation Suite",
+        "script": "scripts/run_evaluation.py",
+        "args": [],
+        "command_count": 22,
+        "estimated_duration": "10s",
+        "attack_pattern": "22 Honeypot Fingerprint Probes + Cross-Reference Invariant Checks",
+        "design_patterns": ["Automated Test Harness", "Cross-Reference Consistency Evaluator"],
+        "description": "Runs 22 honeypot detection probes against the system and scores overall fingerprint resistance.",
+        "highlights": [
+            "22/22 Fingerprint resistance pass check",
+            "Cross-reference state validation",
+            "Latency fast-path vs slow-path benchmark",
+        ],
+    },
+]
+
+# Global process tracking
+_active_process: Optional[subprocess.Popen] = None
+_active_script_id: Optional[str] = None
+_script_logs: List[str] = []
+
+
+@app.get("/api/scripts")
+async def api_get_scripts():
+    """Return the catalog of executable demo & evaluation scripts."""
+    global _active_process, _active_script_id
+    running_id = None
+    if _active_process and _active_process.poll() is None:
+        running_id = _active_script_id
+    return {
+        "scripts": SCRIPTS_CATALOG,
+        "running_script_id": running_id,
+    }
+
+
+@app.get("/api/scripts/status")
+async def api_scripts_status():
+    """Get real-time execution status of background demo script."""
+    global _active_process, _active_script_id, _script_logs
+    is_running = _active_process is not None and _active_process.poll() is None
+    return {
+        "is_running": is_running,
+        "script_id": _active_script_id if is_running else None,
+        "logs": _script_logs[-50:],
+    }
+
+
+@app.post("/api/scripts/run")
+async def api_run_script(payload: dict):
+    """Run a demo or scenario script in the background."""
+    global _active_process, _active_script_id, _script_logs
+    script_id = payload.get("script_id")
+    
+    # Find script definition
+    item = next((s for s in SCRIPTS_CATALOG if s["id"] == script_id), None)
+    if not item:
+        return {"status": "error", "message": f"Script {script_id} not found"}
+
+    # Check if a process is already running
+    if _active_process and _active_process.poll() is None:
+        return {"status": "error", "message": f"Script {_active_script_id} is already running."}
+
+    _script_logs.clear()
+    _script_logs.append(f"[{datetime.now().strftime('%H:%M:%S')}] Starting {item['title']}...")
+
+    cmd = [sys.executable, str(PROJECT_ROOT / item["script"])] + item["args"]
+
+    try:
+        # Note: Set stdin=subprocess.PIPE so interactive prompts won't hang!
+        # If script waits for input (like input() in demo_session.py), send newline automatically
+        process = subprocess.Popen(
+            cmd,
+            cwd=str(PROJECT_ROOT),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        
+        # Pass a newline to stdin in case demo waits for "Press Enter"
+        if process.stdin:
+            try:
+                process.stdin.write("\n")
+                process.stdin.flush()
+            except Exception:
+                pass
+
+        _active_process = process
+        _active_script_id = script_id
+
+        # Async background reader for process output
+        def read_output():
+            nonlocal process
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    _script_logs.append(line.rstrip())
+            process.stdout.close()
+            process.wait()
+
+        import threading
+        t = threading.Thread(target=read_output, daemon=True)
+        t.start()
+
+        return {
+            "status": "ok",
+            "message": f"Launched {item['title']}",
+            "script_id": script_id,
+        }
+    except Exception as e:
+        logger.error(f"Failed to launch script {script_id}: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+@app.post("/api/scripts/stop")
+async def api_stop_script():
+    """Stop the currently running script process."""
+    global _active_process, _active_script_id
+    if _active_process and _active_process.poll() is None:
+        try:
+            _active_process.terminate()
+            _script_logs.append(f"[{datetime.now().strftime('%H:%M:%S')}] Script process terminated by user.")
+        except Exception as e:
+            logger.error(f"Error terminating process: {e}")
+        _active_process = None
+        _active_script_id = None
+        return {"status": "ok", "message": "Script stopped"}
+    return {"status": "ok", "message": "No script running"}
 
 
 # WebSocket endpoint

@@ -1,5 +1,5 @@
 {
-  "session_id": "6e929ca8f1ac",
+  "session_id": "34780cbeab03",
   "attacker_ip": "185.220.101.42",
   "persona_transitions": [
     {
@@ -292,8 +292,8 @@
       "response_length": 131
     }
   ],
-  "start_time": "2026-04-22T20:53:46.277579+00:00",
-  "end_time": "2026-04-22T20:53:47.538195+00:00",
+  "start_time": "2026-10-24T13:54:26.695512+00:00",
+  "end_time": "2026-10-24T13:54:56.277015+00:00",
   "final_score": 100,
   "final_level": "critical",
   "final_persona": "finance_server",
