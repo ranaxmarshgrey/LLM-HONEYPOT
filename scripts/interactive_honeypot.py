@@ -2,26 +2,14 @@
 
 Opens an interactive terminal that looks and behaves like a real Linux
 shell.  Every command you type passes through the full honeypot pipeline
-(FakeFS -> Dictionary/LLM -> Threat Scorer -> Persona Switcher) and the
-results are pushed to the live dashboard in real time.
+(FakeFS -> Dictionary/LLM -> Threat Scorer -> Persona Switcher).
 
 Usage:
-    # Terminal 1 — start the backend + dashboard
-    python -m uvicorn dashboard.app:app --port 8080
-
-    # Terminal 2 — start the Next.js frontend
-    npm run dev
-
-    # Terminal 3 — be the attacker
     python scripts/interactive_honeypot.py
-
-    Open http://localhost:3000 in a browser and watch the dashboard
-    update as you type commands.
 
 Flags:
     --ip 1.2.3.4        Spoof the attacker IP (default: random from pool)
     --persona NAME      Starting persona (default: generic_linux)
-    --no-dashboard      Skip dashboard connection
     --no-score          Hide threat score after each command
 """
 from __future__ import annotations
@@ -43,7 +31,6 @@ if sys.platform == "win32":
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-import requests
 from honeypot.cowrie_hook import create_dispatcher
 from event_logging.session_logger import SessionLogger
 
@@ -69,28 +56,6 @@ IP_POOL = [
 ]
 
 # ---------------------------------------------------------------------------
-# Dashboard client
-# ---------------------------------------------------------------------------
-DASHBOARD_URL = "http://127.0.0.1:8080"
-
-
-def _post(endpoint: str, data: dict) -> bool:
-    try:
-        r = requests.post(f"{DASHBOARD_URL}{endpoint}", json=data, timeout=2)
-        return r.status_code == 200
-    except Exception:
-        return False
-
-
-def _dashboard_alive() -> bool:
-    try:
-        r = requests.get(f"{DASHBOARD_URL}/api/stats", timeout=2)
-        return r.status_code == 200
-    except Exception:
-        return False
-
-
-# ---------------------------------------------------------------------------
 # Threat level from score
 # ---------------------------------------------------------------------------
 def _level(score: int) -> str:
@@ -110,32 +75,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Interactive Honeypot Shell")
     parser.add_argument("--ip", default=None, help="Attacker IP to spoof")
     parser.add_argument("--persona", default="generic_linux", help="Starting persona")
-    parser.add_argument("--no-dashboard", action="store_true", help="Skip dashboard")
     parser.add_argument("--no-score", action="store_true", help="Hide score display")
     args = parser.parse_args()
 
     attacker_ip = args.ip or random.choice(IP_POOL)
-    use_dashboard = not args.no_dashboard
     show_score = not args.no_score
 
     # Banner
     print(f"\n{BOLD}{CYAN}{'=' * 64}")
     print(f"  ADAPTIVE HONEYPOT - Interactive Shell")
-    print(f"  You are the attacker. Type commands. Watch the dashboard.")
+    print(f"  You are the attacker. Type commands.")
     print(f"{'=' * 64}{RESET}\n")
 
-    # Dashboard check
-    dashboard_ok = False
-    if use_dashboard:
-        dashboard_ok = _dashboard_alive()
-        if dashboard_ok:
-            print(f"  {GREEN}[+] Dashboard connected at {DASHBOARD_URL}{RESET}")
-            print(f"  {GREEN}[+] Open http://localhost:3000 to watch live{RESET}")
-        else:
-            print(f"  {YELLOW}[!] Dashboard not running — console-only mode{RESET}")
-            print(f"  {DIM}    Start it: python -m uvicorn dashboard.app:app --port 8080{RESET}")
-
-    print(f"\n  {DIM}Attacker IP : {attacker_ip}")
+    print(f"  {DIM}Attacker IP : {attacker_ip}")
     print(f"  Persona    : {args.persona}")
     print(f"  Type 'exit' or Ctrl+C to quit{RESET}\n")
 
@@ -151,17 +103,6 @@ def main() -> None:
         session_logger=sess_logger,
     )
     session_id = dispatcher.session_id
-
-    # Register session with dashboard
-    if dashboard_ok:
-        _post("/api/dashboard/clear", {})
-        _post("/api/session/start", {
-            "session_id": session_id,
-            "attacker_ip": attacker_ip,
-            "persona": args.persona,
-        })
-        _post("/api/fingerprint", {"score": 19, "total": 22})
-
     prev_persona = args.persona
     running = True
 
@@ -218,32 +159,10 @@ def main() -> None:
         if persona != prev_persona:
             print(f"\n  {BOLD}{ORANGE}>>> PERSONA SWITCH: {prev_persona} -> {persona}{RESET}")
             print(f"  {ORANGE}    System is now presenting as a different environment{RESET}\n")
-            if dashboard_ok:
-                _post("/api/session/switch", {
-                    "session_id": session_id,
-                    "from_persona": prev_persona,
-                    "to_persona": persona,
-                    "trigger_score": score,
-                })
             prev_persona = persona
-
-        # Push to dashboard
-        if dashboard_ok:
-            _post("/api/session/command", {
-                "session_id": session_id,
-                "command": raw,
-                "score_after": score,
-                "score_delta": delta,
-                "category": category,
-                "threat_level": level,
-                "persona": persona,
-                "response_source": source,
-            })
 
     # Cleanup
     dispatcher.close()
-    if dashboard_ok:
-        _post("/api/session/end", {"session_id": session_id})
 
     # Summary
     print(f"\n{BOLD}  Session Summary{RESET}")

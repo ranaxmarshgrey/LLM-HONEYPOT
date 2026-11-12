@@ -14,8 +14,8 @@
 #   2. If --first-run: run setup.sh on the remote
 #   3. Install/update project Python dependencies
 #   4. Apply the Cowrie integration patch
-#   5. Restart Cowrie, dashboard, and ensure iptables redirect is active
-#   6. Run a quick smoke test (SSH connect + dashboard HTTP check)
+#   5. Restart Cowrie and ensure iptables redirect is active
+#   6. Run a quick smoke test (SSH connect)
 #
 set -Eeuo pipefail
 
@@ -26,7 +26,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REMOTE_PROJECT_DIR="/opt/adaptive-honeypot"
 COWRIE_HOME="/opt/cowrie"
-DASHBOARD_PORT=8080
 
 # ---------------------------------------------------------------------------
 # Args
@@ -115,15 +114,10 @@ ssh_cmd "cd ${REMOTE_PROJECT_DIR} && \
   fi"
 
 # ---------------------------------------------------------------------------
-# 6. Install and start systemd services
+# 6. Restart Cowrie
 # ---------------------------------------------------------------------------
-log "installing systemd services"
-ssh_cmd "sudo cp ${REMOTE_PROJECT_DIR}/systemd/honeypot-dashboard.service /etc/systemd/system/ 2>/dev/null || true && \
-  sudo systemctl daemon-reload"
-
-log "restarting services"
+log "restarting Cowrie"
 ssh_cmd "sudo systemctl restart cowrie 2>/dev/null || echo 'cowrie not installed yet'"
-ssh_cmd "sudo systemctl enable --now honeypot-dashboard 2>/dev/null || echo 'dashboard service not installed yet'"
 
 # ---------------------------------------------------------------------------
 # 7. Verify iptables redirect
@@ -146,13 +140,6 @@ else
   warn "Cowrie SSH on port 2222: NOT LISTENING (may still be starting)"
 fi
 
-# Check dashboard
-if ssh_cmd "curl -sf http://127.0.0.1:${DASHBOARD_PORT}/api/stats >/dev/null 2>&1"; then
-  ok "Dashboard on port ${DASHBOARD_PORT}: RUNNING"
-else
-  warn "Dashboard on port ${DASHBOARD_PORT}: NOT RESPONDING (may still be starting)"
-fi
-
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
@@ -162,10 +149,8 @@ ok "  Deployment complete!"
 ok "=========================================="
 echo ""
 echo "  SSH honeypot:  ssh anyuser@${REMOTE_HOST}"
-echo "  Dashboard:     http://${REMOTE_HOST}:${DASHBOARD_PORT}"
 echo ""
 echo "  Useful commands:"
 echo "    ssh ${REMOTE} 'journalctl -u cowrie -f'              # Cowrie logs"
-echo "    ssh ${REMOTE} 'journalctl -u honeypot-dashboard -f'  # Dashboard logs"
 echo "    ssh ${REMOTE} 'cat ${REMOTE_PROJECT_DIR}/event_logging/logs/*.json | tail -20'"
 echo ""

@@ -81,21 +81,3 @@ class TestFingerprintResistance:
         result = next(r for r in results if r.name == "history_has_content")
         assert result.passed, f"history_has_content failed: {result.actual}"
 
-    def test_beats_cowrie_baseline(self, checker: FingerprintChecker, results: list[CheckResult]) -> None:
-        """Our system must pass more checks than Cowrie."""
-        cowrie_results = checker.run_against_cowrie_baseline()
-        our_passed = sum(1 for r in results if r.passed)
-        cowrie_passed = sum(1 for r in cowrie_results if r.passed)
-
-        assert our_passed > cowrie_passed, (
-            f"Our system ({our_passed}/22) does not beat Cowrie ({cowrie_passed}/22)"
-        )
-
-    def test_report_generation(self, checker: FingerprintChecker, results: list[CheckResult]) -> None:
-        """Comparison report generates without errors."""
-        cowrie_results = checker.run_against_cowrie_baseline()
-        text, json_data = checker.generate_comparison_report(results, cowrie_results)
-
-        assert "FINGERPRINT RESISTANCE" in text
-        assert json_data["our_system"]["total_checks"] == 22
-        assert json_data["cowrie_baseline"]["total_checks"] == 22

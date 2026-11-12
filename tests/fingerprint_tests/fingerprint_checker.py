@@ -1,30 +1,21 @@
-"""Fingerprint Resistance Evaluation Suite (Sprint 6).
+"""Fingerprint Resistance Evaluation Suite.
 
 Runs 22 checks against our adaptive honeypot that real attackers and
 automated tools use to detect honeypots. Each check returns a
 ``CheckResult`` indicating pass/fail with evidence.
 
-Also scores the same 22 checks against a vanilla Cowrie baseline
-(using known Cowrie behavior) and generates a side-by-side comparison
-report.
-
 Usage::
 
     checker = FingerprintChecker()
     results = checker.run_all_checks()
-    cowrie = checker.run_against_cowrie_baseline()
-    checker.generate_comparison_report(results, cowrie)
 """
 from __future__ import annotations
 
-import json
-import os
-import re
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 # Our system imports
 from honeypot.cowrie_hook import HoneypotCommandDispatcher, create_dispatcher
@@ -604,167 +595,6 @@ class FingerprintChecker:
             actual=f"Response length: {len(resp)} chars",
         )
 
-    # ------------------------------------------------------------------
-    # Cowrie baseline evaluation
-    # ------------------------------------------------------------------
-
-    def run_against_cowrie_baseline(self) -> List[CheckResult]:
-        """Score all 22 checks against expected vanilla Cowrie behavior.
-
-        Returns hardcoded results based on known Cowrie weaknesses.
-        Cowrie typically fails on consistency, write ops, and signatures.
-        """
-        return [
-            # Timing — Cowrie passes basic timing
-            CheckResult("timing_simple_cmd", True, "< 200ms", "~50ms", "Cowrie is fast"),
-            CheckResult("timing_complex_cmd", False, "> 10ms jitter", "Instant response", "Cowrie has no timing jitter"),
-            CheckResult("timing_variance", False, "Variance > 0", "Nearly identical times", "Cowrie responses are deterministic"),
-
-            # Consistency — Cowrie fails most cross-references
-            CheckResult("cross_ref_passwd_whoami", True, "Match", "Match", "Cowrie handles basic whoami"),
-            CheckResult("cross_ref_hostname", True, "Match", "Match", "Cowrie hostname is consistent"),
-            CheckResult("cross_ref_ps_netstat", False, "Match", "Mismatch", "Cowrie ps/netstat are static and inconsistent"),
-            CheckResult("cross_ref_ls_cat", False, "Readable", "Many files missing", "Cowrie has limited fake filesystem"),
-            CheckResult("cross_ref_home_passwd", False, "Match", "Missing dirs", "Cowrie /home doesn't match passwd"),
-
-            # Realism — Cowrie has known realism gaps
-            CheckResult("proc_version_match", False, "Match", "Mismatch", "Cowrie /proc/version often wrong"),
-            CheckResult("uptime_increases", True, "Increases", "Static", "Cowrie uptime is static but present"),
-            CheckResult("pid_realistic", False, "Gaps", "Sequential", "Cowrie PIDs start from 1"),
-            CheckResult("bash_history_realistic", False, "Content", "Empty", "Cowrie has no bash_history"),
-            CheckResult("file_timestamps_past", True, "Past", "Past", "Cowrie timestamps are reasonable"),
-            CheckResult("process_count_realistic", False, "≥ 3", "2 processes", "Cowrie shows minimal processes"),
-
-            # Write ops — Cowrie has limited write support
-            CheckResult("mkdir_cd_works", True, "Works", "Works", "Cowrie now supports basic mkdir"),
-            CheckResult("touch_cat_works", False, "Works", "File not persisted", "Cowrie touch doesn't persist for cat"),
-            CheckResult("write_persists", False, "Persists", "Lost", "Cowrie write ops don't persist"),
-
-            # Cowrie signatures — Cowrie has known signatures
-            CheckResult("no_cowrie_banner", False, "No cowrie", "Cowrie in banner", "SSH banner reveals Cowrie"),
-            CheckResult("no_empty_commands", True, "Empty", "Empty", "Cowrie returns empty for empty input"),
-            CheckResult("history_has_content", False, "Content", "Empty", "Cowrie history is always empty"),
-            CheckResult("env_vars_realistic", False, "Realistic", "Missing vars", "Cowrie env is incomplete"),
-            CheckResult("shadow_permission", True, "Response", "Permission denied", "Cowrie denies shadow access"),
-        ]
-
-    # ------------------------------------------------------------------
-    # Report generation
-    # ------------------------------------------------------------------
-
-    def generate_comparison_report(
-        self,
-        our_results: List[CheckResult],
-        cowrie_results: List[CheckResult],
-        output_dir: Optional[str] = None,
-    ) -> Tuple[str, dict]:
-        """Generate formatted comparison report.
-
-        Args:
-            our_results: Results from run_all_checks().
-            cowrie_results: Results from run_against_cowrie_baseline().
-            output_dir: Directory to save reports (default: evaluation/).
-
-        Returns:
-            Tuple of (formatted_text, json_data).
-        """
-        if output_dir is None:
-            output_dir = str(Path(__file__).resolve().parent.parent.parent / "evaluation")
-
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Build lookup
-        cowrie_map = {r.name: r for r in cowrie_results}
-        our_map = {r.name: r for r in our_results}
-
-        our_passed = sum(1 for r in our_results if r.passed)
-        cowrie_passed = sum(1 for r in cowrie_results if r.passed)
-
-        # Text report
-        lines = [
-            "=" * 75,
-            "  FINGERPRINT RESISTANCE COMPARISON REPORT",
-            "  Generated: " + datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "=" * 75,
-            "",
-            f"  {'Check':<35s} {'Our System':<15s} {'Cowrie':<15s}",
-            "  " + "─" * 65,
-        ]
-
-        for check_name, description in FINGERPRINT_CHECKS:
-            our = our_map.get(check_name)
-            cow = cowrie_map.get(check_name)
-
-            our_status = "PASS ✓" if (our and our.passed) else "FAIL ✗"
-            cow_status = "PASS ✓" if (cow and cow.passed) else "FAIL ✗"
-
-            lines.append(f"  {check_name:<35s} {our_status:<15s} {cow_status:<15s}")
-
-        lines.extend([
-            "  " + "─" * 65,
-            f"  {'TOTAL':<35s} {our_passed}/22{'':<10s} {cowrie_passed}/22",
-            "=" * 75,
-            "",
-            "  SUMMARY:",
-            f"    Our system passed {our_passed}/22 fingerprint checks",
-            f"    Vanilla Cowrie passed {cowrie_passed}/22 fingerprint checks",
-            f"    Improvement: +{our_passed - cowrie_passed} checks",
-            "",
-        ])
-
-        text = "\n".join(lines)
-
-        # JSON report
-        json_data = {
-            "generated_at": datetime.now(tz=timezone.utc).isoformat(),
-            "our_system": {
-                "total_checks": 22,
-                "passed": our_passed,
-                "failed": 22 - our_passed,
-                "results": [
-                    {
-                        "name": r.name,
-                        "passed": r.passed,
-                        "expected": r.expected,
-                        "actual": r.actual,
-                        "notes": r.notes,
-                    }
-                    for r in our_results
-                ],
-            },
-            "cowrie_baseline": {
-                "total_checks": 22,
-                "passed": cowrie_passed,
-                "failed": 22 - cowrie_passed,
-                "results": [
-                    {
-                        "name": r.name,
-                        "passed": r.passed,
-                        "expected": r.expected,
-                        "actual": r.actual,
-                        "notes": r.notes,
-                    }
-                    for r in cowrie_results
-                ],
-            },
-        }
-
-        # Save files
-        txt_path = os.path.join(output_dir, "fingerprint_report.txt")
-        json_path = os.path.join(output_dir, "fingerprint_report.json")
-
-        with open(txt_path, "w", encoding="utf-8") as f:
-            f.write(text)
-
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(json_data, f, indent=2)
-
-        print(text)
-        print(f"\n  Reports saved to:")
-        print(f"    {txt_path}")
-        print(f"    {json_path}")
-
-        return text, json_data
 
 
 # ---------------------------------------------------------------------------
@@ -773,12 +603,10 @@ class FingerprintChecker:
 
 if __name__ == "__main__":
     checker = FingerprintChecker()
+    results = checker.run_all_checks()
+    passed = sum(1 for r in results if r.passed)
+    print(f"\nFingerprint resistance: {passed}/22 checks passed\n")
+    for r in results:
+        status = "PASS" if r.passed else "FAIL"
+        print(f"  [{status}] {r.name:<35s} {r.actual}")
 
-    print("\n🔍 Running fingerprint checks against our system...\n")
-    our_results = checker.run_all_checks()
-
-    print("\n📊 Generating Cowrie baseline...\n")
-    cowrie_results = checker.run_against_cowrie_baseline()
-
-    print("\n📋 Generating comparison report...\n")
-    checker.generate_comparison_report(our_results, cowrie_results)

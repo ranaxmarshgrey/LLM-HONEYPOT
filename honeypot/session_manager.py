@@ -11,7 +11,7 @@ Design rules (per CLAUDE.md):
     - ``patterns_detected`` is a cumulative set.
     - Persona switches never reset session state -- they merge.
     - ``close_session`` removes the session from the store and returns a
-      summary dict suitable for logging / dashboard consumption.
+      summary dict suitable for logging.
 """
 from __future__ import annotations
 
@@ -244,8 +244,7 @@ class SessionManager:
     def close_session(self, session_id: str) -> Dict[str, Any]:
         """Remove the session from the store and return a summary dict.
 
-        The summary is suitable for logging, dashboard display, or
-        post-session analysis.
+        The summary is suitable for logging or post-session analysis.
         """
         session = self._sessions.pop(session_id, None)
         if session is None:

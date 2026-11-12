@@ -15,7 +15,7 @@
 - Kavya R Chengalath (PES1UG23CS295) — FakeFS + Persona Templates
 - Kiran Kumar B D (PES1UG23CS306) — LLM Response Engine + Prompt Engineering
 - Keerthi A H (PES1UG23CS296) — Threat Scoring + Session Manager
-- Jayanth Gowda (PES1UG23CS263) — Cowrie Setup + Logging + Dashboard
+- Jayanth Gowda (PES1UG23CS263) — Cowrie Setup + Logging
 
 ---
 
@@ -92,8 +92,7 @@ Internet / Real Attacker
                        │
                        ▼
             ┌─────────────────┐
-            │   LOGGING +     │
-            │   DASHBOARD     │
+            │   LOGGING       │
             │                 │
             │  - All sessions │
             │  - Threat scores│
@@ -291,13 +290,12 @@ Layer               Technology
 ─────────────────────────────────────────────────
 SSH Layer           Cowrie (Python)
 Backend             Python 3.11+
-Session Store       Redis (or in-memory dict for dev)
+Session Store       In-memory dict
 FakeFS Storage      JSON files (one per persona)
-LLM API             Anthropic Claude API (primary) / OpenAI GPT-4 (fallback)
+LLM API             Gemini (primary) / Anthropic Claude API (fallback)
 IP Reputation       AbuseIPDB API (free tier)
-Logging             Python logging → JSON files → SQLite
-Dashboard           FastAPI + simple HTML/JS (or Flask)
-Deployment          Ubuntu 22.04 VM (DigitalOcean/AWS)
+Logging             Python logging → JSON-lines files
+Deployment          Ubuntu 22.04 VM
 Version Control     Git + GitHub
 ```
 
@@ -339,13 +337,7 @@ adaptive-honeypot/
 │   ├── session_logger.py          Python's stdlib `logging` package and
 │   └── logs/                      break pytest + many third-party deps.
 │
-├── dashboard/                   ← Web dashboard
-│   ├── app.py                  ← FastAPI/Flask app
-│   ├── templates/
-│   └── static/
-│
 ├── tests/                       ← Consistency + evaluation tests
-│   ├── test_fakefs.py
 │   ├── test_consistency.py      ← Cross-reference test suite
 │   ├── test_threat_scorer.py
 │   └── fingerprint_tests/      ← Known honeypot fingerprint probes
@@ -476,14 +468,16 @@ Run `tests/test_consistency.py` after any FakeFS change. Run `tests/test_threat_
 - [ ] Test that session history is preserved across switch
 **Done when:** Persona switch undetectable across 10 post-switch commands
 
-### Sprint 6 — Evaluation + Dashboard (Week 6–7)
+### Sprint 6 — Evaluation (Week 6–7)
 **Goal:** Prove it works with data
-- [ ] Build `dashboard/app.py` with live session view
 - [ ] Run fingerprint resistance tests
 - [ ] Deploy to internet, collect 1–2 weeks of real data
 - [ ] Analyse and chart all three evaluation metrics
-- [ ] Write comparison against Cowrie baseline
-**Done when:** Three charts showing metrics vs. baseline
+**Done when:** Evaluation data collected and analysed
+
+> Note: The web dashboard (FastAPI + Next.js) was removed during cleanup.
+> Observability is via JSON-lines logs in `event_logging/logs/` and the
+> interactive shell (`scripts/interactive_honeypot.py`).
 
 ---
 
@@ -505,9 +499,9 @@ Run `tests/test_consistency.py` after any FakeFS change. Run `tests/test_threat_
 At the end of Phase-2, you should be able to demonstrate:
 
 1. A live SSH session where an attacker-like interaction receives realistic, consistent responses
-2. A dashboard showing real attacker sessions with threat scores
+2. JSON-lines logs showing real attacker sessions with threat scores
 3. A persona switch happening mid-session, with the evaluator unable to detect the transition point
-4. Three evaluation metric charts showing improvement over Cowrie baseline
+4. Fingerprint resistance checks passing against our system
 5. A consistency test suite that passes 100%
 
 ---
