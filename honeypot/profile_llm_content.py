@@ -220,29 +220,45 @@ def _call_llm_sync(
     system_msg: str,
     user_msg: str,
 ) -> tuple[str, str]:
-    """Call the best available LLM synchronously. Returns (text, provider)."""
+    """Call the best available LLM synchronously. Returns (text, provider).
+
+    Provider chain: GEMINI → OPENROUTER → ANTHROPIC.
+    Each failed provider falls through to the next.
+    """
+    providers: list[tuple[str, str, str]] = []
+
     gemini_key = os.environ.get("GEMINI_API_KEY", "")
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
-
     if gemini_key:
-        try:
-            text = _call_gemini_sync(system_msg, user_msg, gemini_key)
-            return text, "llm_primary"
-        except Exception as exc:
-            logger.warning("Gemini call failed: %s", exc)
-            if anthropic_key:
-                try:
-                    text = _call_anthropic_sync(system_msg, user_msg, anthropic_key)
-                    return text, "llm_fallback"
-                except Exception as exc2:
-                    logger.warning("Anthropic fallback failed: %s", exc2)
-            raise
+        providers.append(("gemini", gemini_key, "llm_primary"))
 
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
+    if openrouter_key:
+        providers.append(("openrouter", openrouter_key,
+                          "llm_primary" if not providers else "llm_fallback"))
+
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if anthropic_key:
-        text = _call_anthropic_sync(system_msg, user_msg, anthropic_key)
-        return text, "llm_primary"
+        providers.append(("anthropic", anthropic_key,
+                          "llm_primary" if not providers else "llm_fallback"))
 
-    raise RuntimeError("No LLM API key available")
+    if not providers:
+        raise RuntimeError("No LLM API key available")
+
+    last_exc = None
+    for name, key, source_label in providers:
+        try:
+            if name == "gemini":
+                text = _call_gemini_sync(system_msg, user_msg, key)
+            elif name == "openrouter":
+                text = _call_openrouter_sync(system_msg, user_msg, key)
+            else:
+                text = _call_anthropic_sync(system_msg, user_msg, key)
+            return text, source_label
+        except Exception as exc:
+            logger.warning("%s call failed: %s", name.capitalize(), exc)
+            last_exc = exc
+
+    raise last_exc  # type: ignore[misc]
 
 
 def _call_gemini_sync(system_msg: str, user_msg: str, api_key: str) -> str:
@@ -263,6 +279,34 @@ def _call_gemini_sync(system_msg: str, user_msg: str, api_key: str) -> str:
             ),
         )
         return resp.text if resp.text else ""
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_do)
+        return future.result(timeout=_PER_CALL_TIMEOUT)
+
+
+def _call_openrouter_sync(system_msg: str, user_msg: str, api_key: str) -> str:
+    """Synchronous OpenRouter call with timeout (OpenAI-compatible)."""
+    import concurrent.futures
+    from openai import OpenAI
+
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    model_name = os.environ.get("OPENROUTER_MODEL", "google/gemini-2.5-flash")
+
+    def _do():
+        resp = client.chat.completions.create(
+            model=model_name,
+            max_tokens=1024,
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+        return resp.choices[0].message.content if resp.choices else ""
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
         future = pool.submit(_do)

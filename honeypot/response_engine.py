@@ -139,11 +139,14 @@ def build_llm_prompt(
 def _detect_llm_provider() -> Tuple[str, str]:
     """Return ``(provider, api_key)`` for the first available LLM backend.
 
-    Priority order: GEMINI_API_KEY → ANTHROPIC_API_KEY → ("none", "").
+    Priority order: GEMINI → OPENROUTER → ANTHROPIC → ("none", "").
     """
     gemini_key = os.environ.get("GEMINI_API_KEY", "")
     if gemini_key:
         return "gemini", gemini_key
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
+    if openrouter_key:
+        return "openrouter", openrouter_key
     anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if anthropic_key:
         return "anthropic", anthropic_key
@@ -179,6 +182,35 @@ async def _call_gemini(
     return response.text if response.text else ""
 
 
+async def _call_openrouter(
+    system_msg: str,
+    user_msg: str,
+    api_key: str,
+    timeout: float,
+) -> str:
+    """Call OpenRouter API (OpenAI-compatible) and return the response text."""
+    from openai import AsyncOpenAI
+
+    client = AsyncOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    model_name = os.environ.get("OPENROUTER_MODEL", "google/gemini-2.5-flash")
+
+    response = await asyncio.wait_for(
+        client.chat.completions.create(
+            model=model_name,
+            max_tokens=1024,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+        ),
+        timeout=timeout,
+    )
+    return response.choices[0].message.content if response.choices else ""
+
+
 async def _call_anthropic(
     system_msg: str,
     user_msg: str,
@@ -209,8 +241,8 @@ async def call_llm_with_fallback(
 ) -> Tuple[str, str]:
     """Call the best available LLM API with a strict timeout.
 
-    Provider priority: GEMINI_API_KEY → ANTHROPIC_API_KEY.
-    If neither key is set, returns a fallback bash error immediately.
+    Provider priority: GEMINI → OPENROUTER → ANTHROPIC.
+    If no key is set, returns a fallback bash error immediately.
 
     Args:
         system_msg: The system prompt.
@@ -225,12 +257,14 @@ async def call_llm_with_fallback(
     provider, api_key = _detect_llm_provider()
 
     if provider == "none":
-        logger.warning("No LLM API key set (GEMINI_API_KEY or ANTHROPIC_API_KEY) — using fallback")
+        logger.warning("No LLM API key set — using fallback")
         return _fallback_response(binary), "fallback"
 
     try:
         if provider == "gemini":
             text = await _call_gemini(system_msg, user_msg, api_key, timeout)
+        elif provider == "openrouter":
+            text = await _call_openrouter(system_msg, user_msg, api_key, timeout)
         else:
             text = await _call_anthropic(system_msg, user_msg, api_key, timeout)
 

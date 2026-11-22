@@ -242,6 +242,7 @@ class TestLlmProviderDetection:
     def test_anthropic_fallback(self):
         old_g = os.environ.pop("GEMINI_API_KEY", None)
         old_a = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_o = os.environ.pop("OPENROUTER_API_KEY", None)
         try:
             os.environ["ANTHROPIC_API_KEY"] = "test-anthropic"
             provider, key = _detect_llm_provider()
@@ -253,10 +254,31 @@ class TestLlmProviderDetection:
                 os.environ["GEMINI_API_KEY"] = old_g
             if old_a:
                 os.environ["ANTHROPIC_API_KEY"] = old_a
+            if old_o:
+                os.environ["OPENROUTER_API_KEY"] = old_o
+
+    def test_openrouter_fallback(self):
+        old_g = os.environ.pop("GEMINI_API_KEY", None)
+        old_a = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_o = os.environ.pop("OPENROUTER_API_KEY", None)
+        try:
+            os.environ["OPENROUTER_API_KEY"] = "test-openrouter"
+            provider, key = _detect_llm_provider()
+            assert provider == "openrouter"
+            assert key == "test-openrouter"
+        finally:
+            os.environ.pop("OPENROUTER_API_KEY", None)
+            if old_g:
+                os.environ["GEMINI_API_KEY"] = old_g
+            if old_a:
+                os.environ["ANTHROPIC_API_KEY"] = old_a
+            if old_o:
+                os.environ["OPENROUTER_API_KEY"] = old_o
 
     def test_no_keys_returns_none(self):
         old_g = os.environ.pop("GEMINI_API_KEY", None)
         old_a = os.environ.pop("ANTHROPIC_API_KEY", None)
+        old_o = os.environ.pop("OPENROUTER_API_KEY", None)
         try:
             provider, key = _detect_llm_provider()
             assert provider == "none"
@@ -266,6 +288,8 @@ class TestLlmProviderDetection:
                 os.environ["GEMINI_API_KEY"] = old_g
             if old_a:
                 os.environ["ANTHROPIC_API_KEY"] = old_a
+            if old_o:
+                os.environ["OPENROUTER_API_KEY"] = old_o
 
 
 # ---------------------------------------------------------------------------
@@ -276,6 +300,7 @@ class TestLlmFallback:
     def test_no_api_key_returns_fallback(self):
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
         old_gemini = os.environ.pop("GEMINI_API_KEY", None)
+        old_or = os.environ.pop("OPENROUTER_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system", "user", "nmap"
@@ -288,10 +313,13 @@ class TestLlmFallback:
                 os.environ["ANTHROPIC_API_KEY"] = old
             if old_gemini is not None:
                 os.environ["GEMINI_API_KEY"] = old_gemini
+            if old_or is not None:
+                os.environ["OPENROUTER_API_KEY"] = old_or
 
     def test_fallback_empty_binary(self):
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
         old_gemini = os.environ.pop("GEMINI_API_KEY", None)
+        old_or = os.environ.pop("OPENROUTER_API_KEY", None)
         try:
             text, source = _run(call_llm_with_fallback(
                 "system", "user", ""
@@ -303,6 +331,8 @@ class TestLlmFallback:
                 os.environ["ANTHROPIC_API_KEY"] = old
             if old_gemini is not None:
                 os.environ["GEMINI_API_KEY"] = old_gemini
+            if old_or is not None:
+                os.environ["OPENROUTER_API_KEY"] = old_or
 
 
 # ---------------------------------------------------------------------------
