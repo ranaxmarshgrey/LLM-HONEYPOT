@@ -408,7 +408,7 @@ class ResponseEngine:
                 return result, "fast_path"
             except Exception as exc:
                 logger.error("fast-path handler error for '%s': %s", parsed.binary, exc)
-                return f"-bash: {parsed.binary}: error", "fallback"
+                return f"-bash: {parsed.binary}: error", "error"
 
         system_msg, user_msg = build_llm_prompt(
             self._fakefs, session, parsed.raw,

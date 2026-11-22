@@ -80,6 +80,39 @@ def _load_persona_fs(name: str) -> dict:
         return json.load(f)
 
 
+def _build_from_profile_escalation(target: str) -> List[ChangeEvent]:
+    """Load escalation events from personas/profile_escalation.json."""
+    escalation_path = _PERSONA_DIR / "profile_escalation.json"
+    if not escalation_path.exists():
+        logger.warning("profile_escalation.json not found — empty change queue")
+        return []
+
+    with open(escalation_path) as f:
+        data = json.load(f)
+
+    stage_idx = 1 if target == "profile_stage_2" else 0
+    stages = data.get("stages", [])
+    if stage_idx >= len(stages):
+        return []
+
+    _PHASE_MAP = {
+        "seeding": TransitionPhase.SEEDING,
+        "building": TransitionPhase.BUILDING,
+        "completing": TransitionPhase.COMPLETING,
+    }
+
+    events: List[ChangeEvent] = []
+    for evt in stages[stage_idx].get("events", []):
+        events.append(ChangeEvent(
+            change_type=evt["change_type"],
+            path=evt["path"],
+            description=evt.get("description", ""),
+            content=evt.get("content"),
+            phase=_PHASE_MAP.get(evt.get("phase", "building"), TransitionPhase.BUILDING),
+        ))
+    return events
+
+
 def _build_generic_to_dev() -> List[ChangeEvent]:
     """Changes for generic_linux -> dev_workstation.
 
@@ -396,7 +429,16 @@ class PersonaSwitcher:
     def _build_change_queue(
         self, from_persona: str, to_persona: str,
     ) -> List[ChangeEvent]:
-        """Select the appropriate change list for a transition pair."""
+        """Select the appropriate change list for a transition pair.
+
+        In profile mode (from_persona == "profile"), reads stage events
+        from ``personas/profile_escalation.json`` instead of using the
+        hard-coded john.dev / finapp paths.
+        """
+        if from_persona == "profile" or to_persona in (
+            "profile_stage_1", "profile_stage_2",
+        ):
+            return _build_from_profile_escalation(to_persona)
         if to_persona == "dev_workstation":
             return _build_generic_to_dev()
         if to_persona == "finance_server":

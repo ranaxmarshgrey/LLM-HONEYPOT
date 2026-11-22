@@ -27,22 +27,29 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import time
 import uuid
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from dictionary.command_handlers import SimpleSession
 from event_logging.session_logger import SessionLogger
+from honeypot.command_parser import parse_command
 from honeypot.fakefs import FakeFS
 from honeypot.persona_switcher import PersonaSwitcher
 from honeypot.response_engine import ResponseEngine
 
 logger = logging.getLogger(__name__)
 
+_FILE_READ_COMMANDS = {"cat", "head", "tail", "less", "more"}
+_DECOY_CHECK_COMMANDS = {"cat", "less", "head", "tail", "ls", "find", "grep", "strings"}
+
 _SOURCE_TO_LOG_SOURCE = {
     "fast_path": "dict",
-    "llm": "llm",
-    "fallback": "dict",
+    "llm": "llm_primary",
+    "fallback": "llm_fallback",
+    "error": "error",
 }
 
 
@@ -99,6 +106,7 @@ class HoneypotCommandDispatcher:
         self._persona_switch_count = 0
         self._switcher = PersonaSwitcher(transition_steps=5)
         self._start_time = time.monotonic()
+        self._planted_paths: set = set()
 
         self._logger = session_logger or SessionLogger()
         self._logger.log_session_start(
@@ -183,17 +191,32 @@ class HoneypotCommandDispatcher:
         Returns:
             A ``(response_text, source)`` tuple.
         """
-        # 1. Get response + threat assessment
+        # 1. Get response + threat assessment (with latency timing)
+        t0 = time.monotonic()
         response, source, decision = await self._engine.handle_command(
             raw_input, self._session,
         )
+        latency_ms = round((time.monotonic() - t0) * 1000)
 
         # 2. If transition in progress, drip next changes into overlay
         if self._switcher.is_transitioning():
             applied = self._switcher.apply_next_changes(self._session.overlay)
+            transition_paths: list = []
             for event in applied:
                 if event.change_type == "add_process":
                     self._fakefs.add_session_process({"command": event.path})
+                if event.change_type in ("add_file", "update_file"):
+                    self._planted_paths.add(event.path)
+                transition_paths.append(event.path)
+
+            if applied and self._switcher.state:
+                self._logger.log_persona_transition(
+                    session_id=self._session_id,
+                    from_stage=self._switcher.state.from_persona,
+                    to_stage=self._switcher.state.to_persona,
+                    phase=self._switcher.state.phase.value,
+                    paths_added=transition_paths,
+                )
 
         # 3. If scorer says switch and no transition running, start one
         if (
@@ -222,6 +245,10 @@ class HoneypotCommandDispatcher:
         # 4. Update session state
         self._threat_score = max(self._threat_score, decision.new_total_score)
 
+        # Keep session object in sync so ThreatScorer's guards work
+        self._session.active_persona = self._persona_name
+        self._session.persona_switch_count = self._persona_switch_count
+
         self._session.command_history.append({
             "raw": raw_input.strip(),
             "output": response[:200],
@@ -235,8 +262,13 @@ class HoneypotCommandDispatcher:
             self._session.patterns_detected.add(p)
         self._session.threat_score = self._threat_score
 
-        # 5. Log & Notify Dashboard
-        log_source = _SOURCE_TO_LOG_SOURCE.get(source, "dict")
+        # 5. Map finer-grained log source
+        parsed = parse_command(raw_input.strip())
+        log_source = _SOURCE_TO_LOG_SOURCE.get(source, "error")
+        if source == "fast_path" and parsed.binary in _FILE_READ_COMMANDS:
+            log_source = "fakefs"
+
+        # 6. Log command with latency
         self._logger.log_command(
             session_id=self._session_id,
             command=raw_input.strip(),
@@ -244,13 +276,41 @@ class HoneypotCommandDispatcher:
             threat_score_after=self._threat_score,
             persona=self._persona_name,
             response_source=log_source,
+            latency_ms=latency_ms,
             threat_category=decision.command_category.value,
             threat_score_delta=decision.score_delta,
             threat_level=decision.threat_level.value,
             patterns_detected=decision.patterns_detected or None,
         )
 
+        # 7. Detect decoy access
+        if self._planted_paths and parsed.binary in _DECOY_CHECK_COMMANDS:
+            decoy_hit = self._check_decoy_access(parsed)
+            if decoy_hit:
+                self._logger.log_decoy_access(
+                    session_id=self._session_id,
+                    path=decoy_hit,
+                    command=raw_input.strip(),
+                )
+
         return response, source
+
+    def _check_decoy_access(self, parsed) -> Optional[str]:
+        """Return the planted path accessed by this command, or None."""
+        for arg in parsed.args:
+            if arg.startswith("-"):
+                continue
+            resolved = self._fakefs.resolve_path(
+                self._session.current_directory, arg,
+            )
+            if resolved in self._planted_paths:
+                return resolved
+            if parsed.binary in ("ls", "find"):
+                prefix = resolved.rstrip("/") + "/"
+                for pp in self._planted_paths:
+                    if pp.startswith(prefix):
+                        return pp
+        return None
 
     def close(self) -> None:
         """End this session. Emits a session_end log event."""
@@ -287,6 +347,13 @@ def create_dispatcher(
     """
     if session_id is None:
         session_id = uuid.uuid4().hex[:12]
+
+    # Profile mode: use profile persona if available and requested
+    if persona_name == "generic_linux":
+        profile_json = Path(__file__).resolve().parent.parent / "personas" / "profile.json"
+        if os.environ.get("HONEYPOT_PROFILE", "").strip() == "1" and profile_json.exists():
+            persona_name = "profile"
+
     return HoneypotCommandDispatcher(
         session_id=session_id,
         attacker_ip=attacker_ip,

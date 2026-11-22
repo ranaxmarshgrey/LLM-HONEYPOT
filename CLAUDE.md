@@ -114,6 +114,12 @@ Internet / Real Attacker
 - **Do NOT modify:** Cowrie's SSH handshake, authentication flow, session tracking
 
 ### Module 2: Session Manager
+> **Status (Nov 2026):** `honeypot/session_manager.py` is unused spec code.
+> The live session layer is `HoneypotCommandDispatcher` in `honeypot/cowrie_hook.py`,
+> which tracks cwd, command history, threat score, persona, and overlay directly.
+> Whether to wire `SessionManager` in or fold its remaining unique bits (IP reputation,
+> pydantic model) into the dispatcher is to be decided after the Phase-2 presentation.
+
 - **Technology:** Python class, Redis or in-memory dict for active sessions
 - **Tracks per session:**
   ```python

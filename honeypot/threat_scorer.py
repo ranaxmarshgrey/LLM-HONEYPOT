@@ -341,6 +341,7 @@ def _threat_level_from_score(score: int) -> ThreatLevel:
 
 
 _PERSONA_ORDER = ["generic_linux", "dev_workstation", "finance_server"]
+_PROFILE_ORDER = ["profile", "profile_stage_1", "profile_stage_2"]
 
 
 # ---------------------------------------------------------------------------
@@ -493,24 +494,27 @@ class PersonaSwitchDecider:
         if switch_count >= self.MAX_SWITCHES:
             return False, None, None
 
+        is_profile = current_persona in _PROFILE_ORDER
+        order = _PROFILE_ORDER if is_profile else _PERSONA_ORDER
+
         current_idx = (
-            _PERSONA_ORDER.index(current_persona)
-            if current_persona in _PERSONA_ORDER
-            else 0
+            order.index(current_persona) if current_persona in order else 0
         )
 
         if new_score >= 81 and current_idx < 2:
+            target = order[2]
             return (
                 True,
-                "finance_server",
+                target,
                 f"Critical threat score ({new_score}) -- escalating to high-value target",
             )
 
         if new_score >= 51 and current_idx < 1:
+            target = order[1]
             return (
                 True,
-                "dev_workstation",
-                f"High threat score ({new_score}) -- escalating to developer environment",
+                target,
+                f"High threat score ({new_score}) -- escalating to enriched environment",
             )
 
         force_patterns = {
@@ -520,7 +524,7 @@ class PersonaSwitchDecider:
         }
         for p in patterns:
             if p in force_patterns and current_idx < 2:
-                target = _PERSONA_ORDER[min(current_idx + 1, 2)]
+                target = order[min(current_idx + 1, 2)]
                 return True, target, f"Dangerous pattern detected: {p}"
 
         return False, None, None

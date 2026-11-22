@@ -44,12 +44,14 @@ from pythonjsonlogger import jsonlogger
 # Internals
 # ---------------------------------------------------------------------------
 
-_VALID_RESPONSE_SOURCES = {"dict", "llm"}
+_VALID_RESPONSE_SOURCES = {"dict", "fakefs", "llm", "llm_primary", "llm_fallback", "error"}
 _VALID_EVENT_TYPES = {
     "session_start",
     "login_attempt",
     "command",
     "persona_switch",
+    "persona_transition",
+    "decoy_access",
     "session_end",
 }
 
@@ -231,6 +233,7 @@ class SessionLogger:
         persona: str,
         response_source: str,
         timestamp: Union[datetime, str, None] = None,
+        latency_ms: Optional[int] = None,
         threat_category: Optional[str] = None,
         threat_score_delta: int = 0,
         threat_level: Optional[str] = None,
@@ -238,9 +241,9 @@ class SessionLogger:
     ) -> None:
         """Record a command executed inside a session.
 
-        ``response_source`` must be ``"dict"`` (fast path) or ``"llm"``
-        (slow path) — matches the two Response Engine paths in
-        CLAUDE.md §5 Module 3.
+        ``response_source`` must be one of ``"dict"``, ``"fakefs"``,
+        ``"llm_primary"``, ``"llm_fallback"``, ``"error"`` (or legacy
+        ``"llm"``).
         """
         if response_source not in _VALID_RESPONSE_SOURCES:
             raise ValueError(
@@ -270,6 +273,8 @@ class SessionLogger:
             "persona": persona,
             "response_source": response_source,
         }
+        if latency_ms is not None:
+            payload["latency_ms"] = latency_ms
         if threat_category is not None:
             payload["threat_category"] = threat_category
         if threat_score_delta:
@@ -279,6 +284,60 @@ class SessionLogger:
         if patterns_detected:
             payload["patterns_detected"] = patterns_detected
         self._emit(payload)
+
+    def log_persona_transition(
+        self,
+        session_id: str,
+        from_stage: str,
+        to_stage: str,
+        phase: str,
+        paths_added: list,
+        timestamp: Union[datetime, str, None] = None,
+    ) -> None:
+        """Record a persona transition step (gradual escalation)."""
+        now = _coerce_time(timestamp)
+        with self._lock:
+            st = self._sessions.get(session_id)
+            ip = st.attacker_ip if st else None
+            port = st.attacker_port if st else None
+        self._emit(
+            {
+                "timestamp": _iso(now),
+                "event_type": "persona_transition",
+                "session_id": session_id,
+                "attacker_ip": ip,
+                "attacker_port": port,
+                "from_stage": from_stage,
+                "to_stage": to_stage,
+                "phase": phase,
+                "paths_added": paths_added,
+            }
+        )
+
+    def log_decoy_access(
+        self,
+        session_id: str,
+        path: str,
+        command: str,
+        timestamp: Union[datetime, str, None] = None,
+    ) -> None:
+        """Record when an attacker accesses a path planted by escalation."""
+        now = _coerce_time(timestamp)
+        with self._lock:
+            st = self._sessions.get(session_id)
+            ip = st.attacker_ip if st else None
+            port = st.attacker_port if st else None
+        self._emit(
+            {
+                "timestamp": _iso(now),
+                "event_type": "decoy_access",
+                "session_id": session_id,
+                "attacker_ip": ip,
+                "attacker_port": port,
+                "path": path,
+                "command": command,
+            }
+        )
 
     def log_session_end(
         self,
