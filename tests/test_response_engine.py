@@ -367,7 +367,7 @@ class TestResponseEngineLlmPath:
         old = os.environ.pop("ANTHROPIC_API_KEY", None)
         old_gemini = os.environ.pop("GEMINI_API_KEY", None)
         try:
-            response, source, _ = _run(engine.handle_command("nmap -sV 10.0.0.1", sess))
+            response, source, _ = _run(engine.handle_command("zzz_unknown_tool --scan", sess))
             assert source == "fallback"
             assert "command not found" in response
         finally:

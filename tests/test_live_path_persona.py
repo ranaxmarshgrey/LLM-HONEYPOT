@@ -8,6 +8,7 @@ Drives the dispatcher the same way cowrie_hook.py does and verifies:
 """
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -22,6 +23,12 @@ from event_logging.session_logger import SessionLogger
 # ---------------------------------------------------------------------------
 
 _LOG_DIR = Path(__file__).resolve().parent.parent / "event_logging" / "logs"
+
+
+@pytest.fixture(autouse=True)
+def _disable_profile_mode(monkeypatch):
+    """Ensure tests in this file always use the standard persona order."""
+    monkeypatch.delenv("HONEYPOT_PROFILE", raising=False)
 
 
 def _make_dispatcher(persona: str = "generic_linux") -> HoneypotCommandDispatcher:

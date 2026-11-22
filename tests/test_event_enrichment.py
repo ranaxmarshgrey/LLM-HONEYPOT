@@ -183,8 +183,9 @@ class TestPersonaTransitionEvent:
         trans = [e for e in events if e["event_type"] == "persona_transition"]
         assert trans[0]["attacker_ip"] == "10.0.0.1"
 
-    def test_dispatcher_emits_transition_during_switch(self, log_path):
+    def test_dispatcher_emits_transition_during_switch(self, log_path, monkeypatch):
         """Drive threat score past 51 and confirm transition events appear."""
+        monkeypatch.delenv("HONEYPOT_PROFILE", raising=False)
         d = _make_dispatcher(log_path)
         heavy = [
             "whoami", "uname -a", "cat /etc/passwd", "cat /etc/shadow",

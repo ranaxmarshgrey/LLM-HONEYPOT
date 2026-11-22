@@ -830,3 +830,175 @@ def handle_tail(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) ->
 
     lines = content.splitlines()
     return "\n".join(lines[-n:])
+
+
+# ---------------------------------------------------------------------------
+# Tier 3 — attack tool handlers (no LLM needed)
+# ---------------------------------------------------------------------------
+
+def handle_nmap(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``nmap`` — looks like it runs but finds nothing interesting."""
+    if not cmd.args:
+        return "Nmap 7.93 ( https://nmap.org )\nUsage: nmap [Scan Type(s)] [Options] {target specification}"
+    target = cmd.args[-1]
+    hostname = fakefs.hostname
+    return (
+        f"Starting Nmap 7.93 ( https://nmap.org ) at {datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC\n"
+        f"Nmap scan report for {target}\n"
+        f"Host is up (0.0024s latency).\n"
+        f"Not shown: 998 closed tcp ports (conn-refused)\n"
+        f"PORT   STATE SERVICE\n"
+        f"22/tcp open  ssh\n"
+        f"80/tcp open  http\n"
+        f"\nNmap done: 1 IP address (1 host up) scanned in 2.34 seconds"
+    )
+
+
+def handle_nc(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``nc`` / ``netcat`` — connection refused or timeout."""
+    if not cmd.args:
+        return "usage: nc [-46CDdFhklNnrStUuvZz] [-I length] [-i interval] [-M ttl]\n          [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n          [-s sourceaddr] [-T keyword] [-V rtable] [-W recvlimit]\n          [-w timeout] [-X proxy_protocol] [-x proxy_address[:port]]\n          [destination] [port]"
+    flags = " ".join(cmd.flags or [])
+    if "-e" in flags or "-c" in flags:
+        return ""
+    target = cmd.args[0] if cmd.args else "localhost"
+    port = cmd.args[1] if len(cmd.args) > 1 else "80"
+    return f"nc: connect to {target} port {port} (tcp) failed: Connection refused"
+
+
+def handle_bash(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``bash`` invocations — reverse shells appear to hang then fail."""
+    raw = cmd.raw
+    if "-i" in raw or "/dev/tcp" in raw or "-c" in raw:
+        return ""
+    if not cmd.args:
+        return ""
+    return f"bash: {cmd.args[0]}: No such file or directory"
+
+
+def handle_python(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``python`` / ``python3``."""
+    flags = " ".join(cmd.flags or [])
+    if "-c" in flags or "-c" in cmd.raw:
+        return ""
+    if not cmd.args:
+        return "Python 3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0] on linux\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>>"
+    return f"python3: can't open file '{cmd.args[0]}': [Errno 2] No such file or directory"
+
+
+def handle_scp(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``scp`` — connection timeout."""
+    if not cmd.args:
+        return "usage: scp [-346ABCpqrTv] [-c cipher] [-F ssh_config] [-i identity_file]\n           [-J destination] [-l limit] [-o ssh_option] [-P port]\n           [-S program] source ... target"
+    return f"ssh: connect to host {cmd.args[-1].split(':')[0]} port 22: Connection timed out\nlost connection"
+
+
+def handle_passwd(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``passwd`` — permission denied for non-root."""
+    user = session.current_user
+    if user == "root":
+        return "New password: \nRetype new password: \npasswd: password updated successfully"
+    return f"passwd: Authentication token manipulation error\npasswd: password unchanged"
+
+
+def handle_less(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``less`` — show file content (like cat)."""
+    if not cmd.args:
+        return "Missing filename (\"less --help\" for help)"
+    filepath = cmd.args[-1]
+    path = _resolve(fakefs, session, filepath)
+    content = session.overlay.get_content(path, fakefs)
+    if content is None:
+        return f"{filepath}: No such file or directory"
+    return content
+
+
+def handle_file(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``file`` — report file type."""
+    if not cmd.args:
+        return "Usage: file [-bcEhikLlNnprsSvzZ0] [--apple] [--extension]\n             [--mime-encoding] [--mime-type] [-e testname] [-F separator]\n             [-f namefile] [-m magicfiles] [-P name=value] file ..."
+    filepath = cmd.args[-1]
+    path = _resolve(fakefs, session, filepath)
+    overlay = session.overlay
+    if not overlay.exists(path, fakefs):
+        return f"{filepath}: cannot open `{filepath}' (No such file or directory)"
+    if overlay.is_directory(path, fakefs):
+        return f"{filepath}: directory"
+    return f"{filepath}: ASCII text"
+
+
+def handle_stat(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``stat`` — show file metadata."""
+    if not cmd.args:
+        return "stat: missing operand\nTry 'stat --help' for more information."
+    filepath = cmd.args[-1]
+    path = _resolve(fakefs, session, filepath)
+    overlay = session.overlay
+
+    if not overlay.exists(path, fakefs):
+        return f"stat: cannot statx '{filepath}': No such file or directory"
+
+    is_dir = overlay.is_directory(path, fakefs)
+    ftype = "directory" if is_dir else "regular file"
+    size = 4096 if is_dir else len(overlay.get_content(path, fakefs) or "")
+    perm = "0755/drwxr-xr-x" if is_dir else "0644/-rw-r--r--"
+
+    return (
+        f"  File: {filepath}\n"
+        f"  Size: {size}\tBlocks: 8\tIO Block: 4096\t{ftype}\n"
+        f"Access: ({perm})\tUid: ( 1000/ {session.current_user})\tGid: ( 1000/ {session.current_user})\n"
+        f"Access: 2026-10-15 09:12:33.000000000 +0000\n"
+        f"Modify: 2026-10-15 09:12:33.000000000 +0000\n"
+        f"Change: 2026-10-15 09:12:33.000000000 +0000\n"
+        f" Birth: 2026-08-01 14:30:00.000000000 +0000"
+    )
+
+
+def handle_systemctl(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``systemctl`` — permission denied for most operations."""
+    if not cmd.args:
+        return "systemctl: command not fully supported in this environment"
+    action = cmd.args[0]
+    if action == "status" and len(cmd.args) > 1:
+        svc = cmd.args[1]
+        return (
+            f"* {svc}.service - {svc.title()} Service\n"
+            f"     Loaded: loaded (/lib/systemd/system/{svc}.service; enabled)\n"
+            f"     Active: active (running) since Mon 2026-11-18 03:21:45 UTC; 4 days ago\n"
+            f"   Main PID: {1200 + hash(svc) % 5000}\n"
+            f"      Tasks: 4 (limit: 4915)\n"
+            f"     Memory: 12.3M\n"
+            f"        CPU: 1.234s"
+        )
+    if action in ("start", "stop", "restart", "enable", "disable"):
+        return f"==== AUTHENTICATING FOR org.freedesktop.systemd1.manage-units ===\nPolkit\\: Authentication is required to manage system services.\nAuthentication failed."
+    return "Unknown operation."
+
+
+def handle_service(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``service`` — permission denied."""
+    if not cmd.args:
+        return "Usage: service < option > | --status-all | [ service_name [ command | --full-restart ] ]"
+    svc = cmd.args[0]
+    if len(cmd.args) > 1 and cmd.args[1] == "status":
+        return f" * {svc} is running"
+    return f"service: unable to connect to system bus: Permission denied"
+
+
+def handle_apt(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``apt`` / ``apt-get`` — permission denied."""
+    if not cmd.args:
+        return "Usage: apt [options] command\n\napt is a commandline package manager."
+    action = cmd.args[0]
+    if action in ("install", "remove", "update", "upgrade", "purge"):
+        return f"E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?"
+    if action == "list" and "--installed" in (cmd.flags or []):
+        return "Listing..."
+    return f"E: Invalid operation {action}"
+
+
+def handle_docker(fakefs: FakeFS, session: SessionProtocol, cmd: ParsedCommand) -> str:
+    """Simulate ``docker`` — permission denied or not found."""
+    if not cmd.args:
+        return "Usage:  docker [OPTIONS] COMMAND\n\nA self-sufficient runtime for containers"
+    return "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post \"http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json\": dial unix /var/run/docker.sock: connect: permission denied"

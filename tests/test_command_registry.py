@@ -134,6 +134,6 @@ class TestRegistryIntegration:
         assert "passwd" in out
 
     def test_unknown_falls_through(self):
-        parsed = parse_command("nmap -sV 10.0.0.1")
+        parsed = parse_command("zzz_nonexistent_command --flag")
         handler = lookup(parsed.binary)
         assert handler is None
