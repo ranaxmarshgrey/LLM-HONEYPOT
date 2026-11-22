@@ -157,18 +157,22 @@ async def _call_gemini(
     timeout: float,
 ) -> str:
     """Call Google Gemini API and return the response text."""
-    import google.generativeai as genai
+    from google import genai
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        model_name=os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
-        system_instruction=system_msg,
-    )
+    client = genai.Client(api_key=api_key)
+    model_name = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 
     loop = asyncio.get_event_loop()
     response = await asyncio.wait_for(
         loop.run_in_executor(
-            None, lambda: model.generate_content(user_msg),
+            None,
+            lambda: client.models.generate_content(
+                model=model_name,
+                contents=user_msg,
+                config=genai.types.GenerateContentConfig(
+                    system_instruction=system_msg,
+                ),
+            ),
         ),
         timeout=timeout,
     )

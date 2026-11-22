@@ -21,6 +21,11 @@ ENV/
 .coverage
 htmlcov/
 
+# Generated profile (per-user, created by setup_profile.py)
+personas/profile.json
+personas/profile_escalation.json
+profile.yaml
+
 # Logs (never commit attacker data)
 event_logging/logs/
 logs/

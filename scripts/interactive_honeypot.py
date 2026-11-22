@@ -31,6 +31,10 @@ if sys.platform == "win32":
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
 from honeypot.cowrie_hook import create_dispatcher
 from event_logging.session_logger import SessionLogger
 
@@ -71,12 +75,46 @@ def _level(score: int) -> str:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+def _ensure_profile() -> None:
+    """If HONEYPOT_PROFILE=1 but no profile.json exists, run first-time setup."""
+    if os.environ.get("HONEYPOT_PROFILE", "").strip() != "1":
+        return
+
+    profile_json = PROJECT_ROOT / "personas" / "profile.json"
+    if profile_json.exists():
+        return
+
+    print(f"\n{BOLD}{MAGENTA}{'=' * 64}")
+    print(f"  FIRST-TIME SETUP")
+    print(f"  Your honeypot needs an identity. Answer a few questions")
+    print(f"  so the system knows what to look like to attackers.")
+    print(f"{'=' * 64}{RESET}\n")
+
+    from scripts.setup_profile import collect_interactive, save_profile
+    from honeypot.profile_generator import generate_profile_persona
+
+    profile = collect_interactive()
+
+    profile_path = PROJECT_ROOT / "profile.yaml"
+    save_profile(profile, profile_path)
+
+    persona_path = PROJECT_ROOT / "personas" / "profile.json"
+    escalation_path = PROJECT_ROOT / "personas" / "profile_escalation.json"
+    generate_profile_persona(profile, persona_path, escalation_path)
+
+    print(f"\n  {GREEN}Profile created!{RESET}")
+    print(f"  {DIM}Honeypot will appear as: {profile['username']}@{profile['hostname']}")
+    print(f"  Role: {profile['role']}{RESET}\n")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Interactive Honeypot Shell")
     parser.add_argument("--ip", default=None, help="Attacker IP to spoof")
     parser.add_argument("--persona", default="generic_linux", help="Starting persona")
     parser.add_argument("--no-score", action="store_true", help="Hide score display")
     args = parser.parse_args()
+
+    _ensure_profile()
 
     attacker_ip = args.ip or random.choice(IP_POOL)
     show_score = not args.no_score
