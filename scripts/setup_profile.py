@@ -163,11 +163,25 @@ def save_profile(profile: dict, path: Path) -> None:
         yaml.dump(profile, fh, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
 
+def _ask_llm_content() -> bool:
+    """Ask the user whether to use LLM for file contents."""
+    while True:
+        answer = input("  Use LLM to write file contents? [Y/n]: ").strip().lower()
+        if answer in ("", "y", "yes"):
+            return True
+        if answer in ("n", "no"):
+            return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Adaptive Honeypot Profile Setup")
     parser.add_argument(
         "--from", dest="from_file", metavar="FILE",
         help="Load profile from a YAML file instead of interactive prompts",
+    )
+    parser.add_argument(
+        "--llm-content", action="store_true", default=False,
+        help="Use LLM to generate realistic file contents for the profile",
     )
     args = parser.parse_args()
 
@@ -176,6 +190,11 @@ def main() -> None:
         print(f"  Loaded profile from {args.from_file}")
     else:
         profile = collect_interactive()
+
+    # Determine LLM content mode
+    use_llm = args.llm_content
+    if not args.from_file and not args.llm_content:
+        use_llm = _ask_llm_content()
 
     profile_path = PROJECT_ROOT / "profile.yaml"
     save_profile(profile, profile_path)
@@ -190,6 +209,42 @@ def main() -> None:
     generate_profile_persona(profile, persona_path, escalation_path)
     print(f"  Generated {persona_path}")
     print(f"  Generated {escalation_path}")
+
+    # LLM content generation (optional)
+    if use_llm:
+        import json
+        from honeypot.profile_llm_content import generate_llm_contents, format_summary_table
+
+        print("\n  Generating LLM-written file contents...")
+        with open(persona_path, "r", encoding="utf-8") as fh:
+            persona_data = json.load(fh)
+
+        filesystem, report = generate_llm_contents(profile, persona_data["filesystem"])
+        persona_data["filesystem"] = filesystem
+
+        # Re-validate and write
+        from honeypot.fakefs import Persona
+        from honeypot.persona_validator import validate as _validate_persona
+        from datetime import datetime, timezone
+
+        Persona.model_validate(persona_data)
+        errors = _validate_persona(persona_data, datetime.now(tz=timezone.utc))
+        if errors:
+            print(f"\n  WARNING: Validation errors after LLM content:")
+            for e in errors:
+                print(f"    - {e}")
+        else:
+            with open(persona_path, "w", encoding="utf-8") as fh:
+                json.dump(persona_data, fh, indent=2, ensure_ascii=False)
+
+        # Write generation report
+        report_path = PROJECT_ROOT / "personas" / "profile_generation_report.json"
+        with open(report_path, "w", encoding="utf-8") as fh:
+            json.dump(report, fh, indent=2, ensure_ascii=False)
+
+        print(f"\n{format_summary_table(report)}")
+        print(f"\n  Report saved to {report_path}")
+
     print("\n  Done! The honeypot will use this profile on next start.\n")
 
 

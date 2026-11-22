@@ -90,10 +90,11 @@ def _ensure_profile() -> None:
     print(f"  so the system knows what to look like to attackers.")
     print(f"{'=' * 64}{RESET}\n")
 
-    from scripts.setup_profile import collect_interactive, save_profile
+    from scripts.setup_profile import collect_interactive, save_profile, _ask_llm_content
     from honeypot.profile_generator import generate_profile_persona
 
     profile = collect_interactive()
+    use_llm = _ask_llm_content()
 
     profile_path = PROJECT_ROOT / "profile.yaml"
     save_profile(profile, profile_path)
@@ -101,6 +102,33 @@ def _ensure_profile() -> None:
     persona_path = PROJECT_ROOT / "personas" / "profile.json"
     escalation_path = PROJECT_ROOT / "personas" / "profile_escalation.json"
     generate_profile_persona(profile, persona_path, escalation_path)
+
+    if use_llm:
+        import json as _json
+        from honeypot.profile_llm_content import generate_llm_contents, format_summary_table
+
+        print(f"\n  {DIM}Generating LLM-written file contents...{RESET}")
+        with open(persona_path, "r", encoding="utf-8") as fh:
+            persona_data = _json.load(fh)
+
+        filesystem, report = generate_llm_contents(profile, persona_data["filesystem"])
+        persona_data["filesystem"] = filesystem
+
+        from honeypot.fakefs import Persona
+        from honeypot.persona_validator import validate as _validate_persona
+        from datetime import datetime, timezone
+
+        Persona.model_validate(persona_data)
+        errors = _validate_persona(persona_data, datetime.now(tz=timezone.utc))
+        if not errors:
+            with open(persona_path, "w", encoding="utf-8") as fh:
+                _json.dump(persona_data, fh, indent=2, ensure_ascii=False)
+
+        report_path = PROJECT_ROOT / "personas" / "profile_generation_report.json"
+        with open(report_path, "w", encoding="utf-8") as fh:
+            _json.dump(report, fh, indent=2, ensure_ascii=False)
+
+        print(format_summary_table(report))
 
     print(f"\n  {GREEN}Profile created!{RESET}")
     print(f"  {DIM}Honeypot will appear as: {profile['username']}@{profile['hostname']}")

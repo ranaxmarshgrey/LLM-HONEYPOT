@@ -465,7 +465,7 @@ def _build_filesystem(
         if interests:
             home_children.append("projects")
     elif role == "developer":
-        home_children.extend(["projects", ".gitconfig", "notes.md"])
+        home_children.extend(["projects", ".gitconfig", "notes.md", "Documents"])
     else:
         home_children.extend(["Documents", "Downloads"])
 
@@ -560,8 +560,9 @@ def _build_student_home(
         "size_bytes": len(c.encode()), "content": c,
     })
 
-    _dir_in(f"{home}/Documents", ["notes.txt"])
-    _file_in(f"{home}/Documents/notes.txt", f"# Notes\n- {org or 'University'} semester 6\n- Capstone project due soon\n")
+    _dir_in(f"{home}/Documents", ["notes.txt", "todo.txt"])
+    _file_in(f"{home}/Documents/notes.txt", f"# Notes\n- {org or 'University'} semester 6\n- Capstone project due soon\n- Check lab schedule\n- Library books due Friday\n- Meet study group at 4pm\n")
+    _file_in(f"{home}/Documents/todo.txt", f"# TODO\n1. Finish assignment 1\n2. Study for midterms\n3. Update project README\n4. Submit lab report\n5. Email professor about extension\n")
 
     _dir_in(f"{home}/semester-6", ["assignment1.py", "lab3.c", "README.md"])
     _file_in(f"{home}/semester-6/assignment1.py",
@@ -599,7 +600,11 @@ def _build_developer_home(
     gitconfig_content = f"[user]\n\tname = {username}\n\temail = {username}@{_slug(org) + '.com' if org else 'example.com'}\n"
     _file_in(f"{home}/.gitconfig", gitconfig_content)
 
-    _file_in(f"{home}/notes.md", f"# Dev Notes\n\n- TODO: finish API endpoints\n- Review PR #42\n")
+    _file_in(f"{home}/notes.md", f"# Dev Notes\n\n- TODO: finish API endpoints\n- Review PR #42\n- Check staging deploy\n- Update dependencies\n- Write migration script\n")
+
+    _dir_in(f"{home}/Documents", ["meeting-notes.txt", "design-notes.txt"])
+    _file_in(f"{home}/Documents/meeting-notes.txt", f"# Team Standup Notes\n\nDate: Monday\n- Discussed sprint goals\n- Backend API needs load testing\n- Frontend deploy scheduled for Thursday\n- Action item: update CI config\n")
+    _file_in(f"{home}/Documents/design-notes.txt", f"# Design Notes\n\nFeature: user authentication\n- Use JWT tokens for session management\n- Add rate limiting on login endpoint\n- Need to handle token refresh flow\n- Consider adding 2FA later\n")
 
     project_names = [_slug(i) for i in interests[:2]] if interests else ["webapp"]
     _dir_in(f"{home}/projects", project_names)
@@ -636,9 +641,11 @@ def _build_generic_home(
         "size_bytes": len(c.encode()), "content": c,
     })
 
-    _dir_in(f"{home}/Documents", ["notes.txt", "todo.txt"])
-    _file_in(f"{home}/Documents/notes.txt", "# Personal notes\n- Remember to update packages\n- Check backups\n")
-    _file_in(f"{home}/Documents/todo.txt", "1. Clean up downloads\n2. Update system\n3. Organize photos\n")
+    _dir_in(f"{home}/Documents", ["notes.txt", "todo.txt", "draft.txt", "shopping-list.txt"])
+    _file_in(f"{home}/Documents/notes.txt", "# Personal notes\n- Remember to update packages\n- Check backups\n- Call dentist for appointment\n- Renew library card\n- Pick up dry cleaning\n")
+    _file_in(f"{home}/Documents/todo.txt", "1. Clean up downloads\n2. Update system\n3. Organize photos\n4. Pay electricity bill\n5. Schedule car service\n")
+    _file_in(f"{home}/Documents/draft.txt", "Dear Manager,\n\nI am writing to request time off\nfrom December 20 through January 2.\n\nI have completed all pending tasks\nand will ensure a smooth handover.\n\nThank you for considering this request.\n\nBest regards\n")
+    _file_in(f"{home}/Documents/shopping-list.txt", "# Shopping List\n- Milk\n- Bread\n- Coffee\n- Rice\n- Vegetables\n")
 
 
 def _slug(text: str) -> str:

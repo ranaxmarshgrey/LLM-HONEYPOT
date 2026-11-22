@@ -24,6 +24,7 @@ htmlcov/
 # Generated profile (per-user, created by setup_profile.py)
 personas/profile.json
 personas/profile_escalation.json
+personas/profile_generation_report.json
 profile.yaml
 
 # Logs (never commit attacker data)
