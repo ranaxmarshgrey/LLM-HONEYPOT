@@ -26,6 +26,7 @@ personas/profile.json
 personas/profile_escalation.json
 personas/profile_generation_report.json
 profile.yaml
+host_key
 
 # Logs (never commit attacker data)
 event_logging/logs/

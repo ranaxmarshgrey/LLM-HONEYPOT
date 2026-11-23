@@ -10,7 +10,7 @@ Usage:
 Flags:
     --ip 1.2.3.4        Spoof the attacker IP (default: random from pool)
     --persona NAME      Starting persona (default: generic_linux)
-    --no-score          Hide threat score after each command
+    --debug             Show threat score bar and persona switch alerts
 """
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ from honeypot.cowrie_hook import create_dispatcher
 from event_logging.session_logger import SessionLogger
 
 # ---------------------------------------------------------------------------
-# ANSI
+# ANSI (only used in --debug mode and first-run setup)
 # ---------------------------------------------------------------------------
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
@@ -139,23 +139,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Interactive Honeypot Shell")
     parser.add_argument("--ip", default=None, help="Attacker IP to spoof")
     parser.add_argument("--persona", default="generic_linux", help="Starting persona")
-    parser.add_argument("--no-score", action="store_true", help="Hide score display")
+    parser.add_argument("--debug", action="store_true",
+                        help="Show threat score bar and persona switch alerts")
+    # Keep --no-score as hidden alias for backward compat (inverted)
+    parser.add_argument("--no-score", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
 
     _ensure_profile()
 
     attacker_ip = args.ip or random.choice(IP_POOL)
-    show_score = not args.no_score
+    debug_mode = args.debug and not args.no_score
 
-    # Banner
-    print(f"\n{BOLD}{CYAN}{'=' * 64}")
-    print(f"  ADAPTIVE HONEYPOT - Interactive Shell")
-    print(f"  You are the attacker. Type commands.")
-    print(f"{'=' * 64}{RESET}\n")
-
-    print(f"  {DIM}Attacker IP : {attacker_ip}")
-    print(f"  Persona    : {args.persona}")
-    print(f"  Type 'exit' or Ctrl+C to quit{RESET}\n")
+    # SSH-style login banner — looks like a real connection
+    hostname = None
 
     # Create dispatcher
     sess_logger = SessionLogger(
@@ -169,13 +165,23 @@ def main() -> None:
         session_logger=sess_logger,
     )
     session_id = dispatcher.session_id
+    hostname = dispatcher.fakefs.hostname
     prev_persona = args.persona
+
+    # Print realistic SSH login banner
+    kernel = dispatcher.fakefs.get_system_info().get("kernel_version", "5.15.0-91-generic")
+    print(f"\nWelcome to Ubuntu 22.04.3 LTS (GNU/Linux {kernel} x86_64)\n")
+    print(" * Documentation:  https://help.ubuntu.com")
+    print(" * Management:     https://landscape.canonical.com")
+    print(" * Support:        https://ubuntu.com/advantage\n")
+    print(f"Last login: {_fake_last_login()} from {_fake_login_ip()}")
+
     running = True
 
     def handle_sigint(sig, frame):
         nonlocal running
         running = False
-        print(f"\n\n{DIM}  Connection closed by remote host.{RESET}\n")
+        print("\nConnection to {} closed.".format(hostname))
 
     signal.signal(signal.SIGINT, handle_sigint)
 
@@ -183,61 +189,79 @@ def main() -> None:
     while running:
         try:
             prompt = dispatcher.prompt
-            raw = input(f"{GREEN}{prompt}{RESET}")
+            raw = input(prompt)
         except (EOFError, KeyboardInterrupt):
-            print(f"\n{DIM}  Connection closed by remote host.{RESET}\n")
+            print("\nlogout")
+            print("Connection to {} closed.".format(hostname))
             break
 
         raw = raw.strip()
         if not raw:
             continue
         if raw.lower() in ("exit", "logout", "quit"):
-            print(f"{DIM}logout{RESET}")
-            print(f"{DIM}Connection to {dispatcher.fakefs.hostname} closed.{RESET}")
+            print("logout")
+            print("Connection to {} closed.".format(hostname))
             break
 
         # Dispatch through the full pipeline
         response, source = dispatcher.dispatch(raw)
 
-        # Print response
+        # Print response — just the output, nothing else
         if response.strip():
             print(response)
 
-        # Get threat info
-        session = dispatcher.session
-        score = session.threat_score
-        level = _level(score)
-        history = session.command_history
-        last_entry = history[-1] if history else {}
-        delta = last_entry.get("score_delta", 0)
-        category = last_entry.get("category", "benign")
-        persona = dispatcher.persona_name
+        # Debug mode: show threat info (for defenders / demo explanation)
+        if debug_mode:
+            session = dispatcher.session
+            score = session.threat_score
+            level = _level(score)
+            history = session.command_history
+            last_entry = history[-1] if history else {}
+            delta = last_entry.get("score_delta", 0)
+            category = last_entry.get("category", "benign")
+            persona = dispatcher.persona_name
 
-        # Show score bar (subtle, below the output)
-        if show_score:
             lc = LEVEL_COLORS.get(level, GREEN)
             filled = int(score / 100 * 20)
             bar = f"{'#' * filled}{'.' * (20 - filled)}"
             delta_str = f"+{delta}" if delta > 0 else str(delta)
             print(f"{DIM}  [{bar}] {lc}{score}/100{RESET} {DIM}({delta_str} {category}){RESET}")
 
-        # Persona switch
-        if persona != prev_persona:
-            print(f"\n  {BOLD}{ORANGE}>>> PERSONA SWITCH: {prev_persona} -> {persona}{RESET}")
-            print(f"  {ORANGE}    System is now presenting as a different environment{RESET}\n")
-            prev_persona = persona
+            if persona != prev_persona:
+                print(f"\n  {BOLD}{ORANGE}>>> PERSONA SWITCH: {prev_persona} -> {persona}{RESET}")
+                print(f"  {ORANGE}    System is now presenting as a different environment{RESET}\n")
+                prev_persona = persona
 
     # Cleanup
     dispatcher.close()
 
-    # Summary
-    print(f"\n{BOLD}  Session Summary{RESET}")
-    print(f"  {'-' * 40}")
-    print(f"  Commands : {len(dispatcher.session.command_history)}")
-    lc = LEVEL_COLORS.get(level, GREEN)
-    print(f"  Score    : {lc}{score}/100 ({level.upper()}){RESET}")
-    print(f"  Persona  : {persona}")
-    print()
+
+def _fake_last_login() -> str:
+    """Generate a realistic-looking last login timestamp."""
+    import datetime
+    now = datetime.datetime.now()
+    delta = datetime.timedelta(
+        hours=random.randint(2, 48),
+        minutes=random.randint(0, 59),
+    )
+    t = now - delta
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    return "{} {} {:2d} {:02d}:{:02d}:{:02d} {:4d}".format(
+        days[t.weekday()], months[t.month - 1], t.day,
+        t.hour, t.minute, t.second, t.year,
+    )
+
+
+def _fake_login_ip() -> str:
+    """Generate a plausible previous login IP."""
+    return "{}.{}.{}.{}".format(
+        random.choice([10, 172, 192]),
+        random.randint(0, 255),
+        random.randint(0, 255),
+        random.randint(1, 254),
+    )
 
 
 if __name__ == "__main__":
